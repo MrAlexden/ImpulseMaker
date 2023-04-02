@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32922.545
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImpulseMaker", "ImpulseMaker.csproj", "{663B00E6-9B49-4868-AFEB-24FCA1020EDC}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{663B00E6-9B49-4868-AFEB-24FCA1020EDC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{663B00E6-9B49-4868-AFEB-24FCA1020EDC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{663B00E6-9B49-4868-AFEB-24FCA1020EDC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{663B00E6-9B49-4868-AFEB-24FCA1020EDC}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {87022A71-CA76-4192-9E7C-E2B98B2801DD}
+	EndGlobalSection
+EndGlobal
