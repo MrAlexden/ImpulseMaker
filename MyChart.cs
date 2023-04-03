@@ -31,17 +31,17 @@ namespace ImpulseMaker
 
         struct chart_coord
         {
-            public chart_coord(float x_min_in, float x_max_in, float y_min_in, float y_max_in)
+            public chart_coord(double x_min_in, double x_max_in, double y_min_in, double y_max_in)
             {
                 x_min = x_min_in;
                 x_max = x_max_in;
                 y_min = y_min_in;
                 y_max = y_max_in;
             }
-            public float x_min;
-            public float x_max;
-            public float y_min;
-            public float y_max;
+            public double x_min;
+            public double x_max;
+            public double y_min;
+            public double y_max;
         }
 
         public bool is_in_chart_area
@@ -154,9 +154,11 @@ namespace ImpulseMaker
                 e.ChartGraphics.Graphics.DrawLine(pen, chart_area.X, highligt_y, chart_area.X + chart_area.Width, highligt_y);
                 e.ChartGraphics.Graphics.DrawLine(pen, highligt_x, chart_area.Y, highligt_x, chart_area.Y + chart_area.Height);
 
-                e.ChartGraphics.Graphics.DrawString(this.ChartAreas[0].AxisX.PixelPositionToValue(highligt_x).ToString(),
+                e.ChartGraphics.Graphics.DrawString(Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(highligt_x),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
                     this.Font, Brushes.Black, highligt_x, chart_area.Y - 20);
-                e.ChartGraphics.Graphics.DrawString(this.ChartAreas[0].AxisY.PixelPositionToValue(highligt_y).ToString(),
+                e.ChartGraphics.Graphics.DrawString(Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(highligt_y),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
                     this.Font, Brushes.Black, chart_area.X + chart_area.Width + 5, highligt_y);
             }
 
@@ -324,18 +326,22 @@ namespace ImpulseMaker
 
             if (is_in_chart_area && this.Cursor == Cursors.NoMove2D)
             {
-                zoom_history.Add(new chart_coord((float)this.ChartAreas[0].AxisX.Minimum,
-                                                (float)this.ChartAreas[0].AxisX.Maximum,
-                                                (float)this.ChartAreas[0].AxisY.Minimum,
-                                                (float)this.ChartAreas[0].AxisY.Maximum));
+                zoom_history.Add(new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
+                                                (double)this.ChartAreas[0].AxisX.Maximum,
+                                                (double)this.ChartAreas[0].AxisY.Minimum,
+                                                (double)this.ChartAreas[0].AxisY.Maximum));
 
-                double v1 = this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X);
-                double v2 = this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X + zoom_area.Width);
+                double v1 = Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                double v2 = Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X + zoom_area.Width),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
                 this.ChartAreas[0].AxisX.Minimum = v1;
                 this.ChartAreas[0].AxisX.Maximum = v2;
 
-                double v3 = this.ChartAreas[0].AxisY.PixelPositionToValue((double)(zoom_area.Y + zoom_area.Height));
-                double v4 = this.ChartAreas[0].AxisY.PixelPositionToValue((double)(zoom_area.Y));
+                double v3 = Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(zoom_area.Y + zoom_area.Height),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                double v4 = Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(zoom_area.Y),
+                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
                 this.ChartAreas[0].AxisY.Minimum = v3;
                 this.ChartAreas[0].AxisY.Maximum = v4;
 

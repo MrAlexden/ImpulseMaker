@@ -626,6 +626,8 @@ namespace ImpulseMaker
 
             WholeSignalChart.ChartAreas[0].AxisX.Minimum = 0;
             WholeSignalChart.ChartAreas[0].AxisX.Maximum = (double)SignalDurationValue.Value;
+            WholeSignalChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+            WholeSignalChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
             WholeSignalChart.ChartAreas[0].AxisX.Interval = (double)SignalDurationValue.Value / 10;
         }
@@ -841,6 +843,8 @@ namespace ImpulseMaker
 
             WholeSignalChart.ChartAreas[0].AxisX.Minimum = 0;
             WholeSignalChart.ChartAreas[0].AxisX.Maximum = (double)SignalDurationValue.Value;
+            WholeSignalChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+            WholeSignalChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
             WholeSignalChart.ChartAreas[0].AxisX.Interval = (double)SignalDurationValue.Value / 10;
         }
