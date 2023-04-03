@@ -63,6 +63,16 @@ namespace ImpulseMaker.Properties {
         /// <summary>
         ///   Looks up a localized resource of type System.Drawing.Bitmap.
         /// </summary>
+        internal static System.Drawing.Bitmap Add_point {
+            get {
+                object obj = ResourceManager.GetObject("Add_point", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
         internal static System.Drawing.Bitmap diskette {
             get {
                 object obj = ResourceManager.GetObject("diskette", resourceCulture);
@@ -76,6 +86,36 @@ namespace ImpulseMaker.Properties {
         internal static System.Drawing.Bitmap png_transparent_icon_design_trash_red_line_area_material_rectangle {
             get {
                 object obj = ResourceManager.GetObject("png-transparent-icon-design-trash-red-line-area-material-rectangle", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Zoom_back {
+            get {
+                object obj = ResourceManager.GetObject("Zoom_back", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Zoom_Back_To_Whole {
+            get {
+                object obj = ResourceManager.GetObject("Zoom_Back_To_Whole", resourceCulture);
+                return ((System.Drawing.Bitmap)(obj));
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        /// </summary>
+        internal static System.Drawing.Bitmap Zoom_in {
+            get {
+                object obj = ResourceManager.GetObject("Zoom_in", resourceCulture);
                 return ((System.Drawing.Bitmap)(obj));
             }
         }

@@ -158,5 +158,14 @@
   <ItemGroup>
     <None Include="Resources\png-transparent-icon-design-trash-red-line-area-material-rectangle.png" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Zoom_Back_To_Whole.png" />
+    <None Include="Resources\Zoom_back.png" />
+    <None Include="Resources\Add_point.png" />
+    <None Include="Resources\add_point.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Zoom_in.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
