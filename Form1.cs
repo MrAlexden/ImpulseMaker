@@ -562,10 +562,10 @@ namespace ImpulseMaker
                 switch (i % 3)
                 {
                     case 0:
-                        xarr[i] = xarr[i - 3] + (double)RampPeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 3] + (double)RampPeriodValue.Value;
                         break;
                     case 1:
-                        xarr[i] = xarr[i - 3] + (double)RampPeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 3] + (double)RampPeriodValue.Value;
                         break;
                     case 2:
                         xarr[i] = xarr[i - 3] + (double)RampPeriodValue.Value;
@@ -756,19 +756,19 @@ namespace ImpulseMaker
                 switch (i % 6)
                 {
                     case 0:
-                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;
                         break;
                     case 1:
-                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;
                         break;
                     case 2:
-                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;
                         break;
                     case 3:
-                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;
                         break;
                     case 4:
-                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value + 1 / (double)SamplingRateValue.Value;
+                        xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;
                         break;
                     case 5:
                         xarr[i] = xarr[i - 6] + (double)ImpulsePeriodValue.Value;

@@ -689,6 +689,8 @@ namespace ImpulseMaker
             chartArea1.Name = "ChartArea1";
             this.WholeSignalChart.ChartAreas.Add(chartArea1);
             this.WholeSignalChart.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.WholeSignalChart.enable_add_point = false;
+            this.WholeSignalChart.is_in_chart_area = false;
             legend1.Name = "Legend1";
             this.WholeSignalChart.Legends.Add(legend1);
             this.WholeSignalChart.Location = new System.Drawing.Point(0, 411);
@@ -714,6 +716,8 @@ namespace ImpulseMaker
             chartArea2.AxisY.MajorGrid.LineDashStyle = System.Windows.Forms.DataVisualization.Charting.ChartDashStyle.Dot;
             chartArea2.Name = "ChartArea1";
             this.OneSegmentChart.ChartAreas.Add(chartArea2);
+            this.OneSegmentChart.enable_add_point = true;
+            this.OneSegmentChart.is_in_chart_area = false;
             legend2.Name = "Legend1";
             this.OneSegmentChart.Legends.Add(legend2);
             this.OneSegmentChart.Location = new System.Drawing.Point(0, 34);

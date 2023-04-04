@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Numerics;
+using System.ComponentModel;
 
 namespace ImpulseMaker
 {
@@ -21,13 +22,18 @@ namespace ImpulseMaker
         bool is_in_ca = false,
             is_left = true,
             is_enter = true,
-            is_mousedown = false,
-            recalc_chart_area = false;
+            is_L_mouse_down = false,
+            is_R_mouse_down = false,
+            recalc_chart_area = false,
+            e_a_p = true;
         float highligt_x,
             highligt_y,
             tozoom_x,
-            tozoom_y;
+            tozoom_y,
+            toshift_x,
+            toshift_y;
         List<chart_coord> zoom_history = new List<chart_coord>();
+        chart_coord default_chart_coord;
 
         struct chart_coord
         {
@@ -55,6 +61,12 @@ namespace ImpulseMaker
             }
         }
 
+        public bool enable_add_point
+        {
+            get { return e_a_p; }
+            set { e_a_p = value; Invalidate(); }
+        }
+
         public MyChart()
         {
             //avoid flickering
@@ -77,8 +89,10 @@ namespace ImpulseMaker
 
             if (is_enter)
             {
-                options_area = new RectangleF((float)(this.Width - 80), (float)(this.Height * 0.85), 46, 20);
-                zoom_options_area = new RectangleF((float)(this.Width - 80 + 1), (float)(this.Height * 0.85 - 46), 20, 46);
+                options_area = new RectangleF((float)(this.Width - (enable_add_point ? 80 : 57)),
+                    (float)(this.Height * 0.85),
+                    enable_add_point ? 46 : 23, 20);
+                zoom_options_area = new RectangleF((float)(options_area.X + 1), (float)(options_area.Y - 46), 20, 46);
             }
 
             if (is_enter || recalc_chart_area)
@@ -136,14 +150,17 @@ namespace ImpulseMaker
                 new Rectangle(0, 0, Properties.Resources.Zoom_in.Width, Properties.Resources.Zoom_in.Height),
                 GraphicsUnit.Pixel);
 
-            Rectangle option_addpoint = new Rectangle(new Point(option_zoom.X + 23, option_zoom.Y),
-                new Size(18, 18));
-            path = RoundedRectangle.Create(option_addpoint, 3);
-            e.ChartGraphics.Graphics.FillPath(highlightbutton == 1 || this.Cursor == Cursors.Cross ? Brushes.LightBlue : Brushes.WhiteSmoke, path);
-            e.ChartGraphics.Graphics.DrawImage(Properties.Resources.Add_point,
-                new Rectangle(option_zoom.X + 23, option_zoom.Y + 1, 18, 18),
-                new Rectangle(0, 0, Properties.Resources.Add_point.Width, Properties.Resources.Add_point.Height),
-                GraphicsUnit.Pixel);
+            if (enable_add_point)
+            {
+                Rectangle option_addpoint = new Rectangle(new Point(option_zoom.X + 23, option_zoom.Y),
+                    new Size(18, 18));
+                path = RoundedRectangle.Create(option_addpoint, 3);
+                e.ChartGraphics.Graphics.FillPath(highlightbutton == 1 || this.Cursor == Cursors.Cross ? Brushes.LightBlue : Brushes.WhiteSmoke, path);
+                e.ChartGraphics.Graphics.DrawImage(Properties.Resources.Add_point,
+                    new Rectangle(option_zoom.X + 23, option_zoom.Y + 1, 18, 18),
+                    new Rectangle(0, 0, Properties.Resources.Add_point.Width, Properties.Resources.Add_point.Height),
+                    GraphicsUnit.Pixel);
+            }
 
             if (is_in_chart_area && !is_left)
             {
@@ -155,14 +172,14 @@ namespace ImpulseMaker
                 e.ChartGraphics.Graphics.DrawLine(pen, highligt_x, chart_area.Y, highligt_x, chart_area.Y + chart_area.Height);
 
                 e.ChartGraphics.Graphics.DrawString(Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(highligt_x),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
                     this.Font, Brushes.Black, highligt_x, chart_area.Y - 20);
                 e.ChartGraphics.Graphics.DrawString(Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(highligt_y),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2).ToString(),
                     this.Font, Brushes.Black, chart_area.X + chart_area.Width + 5, highligt_y);
             }
 
-            if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && is_mousedown)
+            if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && is_L_mouse_down)
             {
                 e.ChartGraphics.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(25, Color.Red)), zoom_area);
             }
@@ -231,25 +248,52 @@ namespace ImpulseMaker
                 zoom_area = new RectangleF(tozoom_x > e.X ? e.X : tozoom_x,
                     tozoom_y > e.Y ? e.Y : tozoom_y, Math.Abs(e.X - tozoom_x), Math.Abs(e.Y - tozoom_y));
             }
+
+            if (is_in_chart_area && this.Cursor == Cursors.Hand)
+            {
+                double v1 = Math.Round(Math.Abs(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) -
+                    this.ChartAreas[0].AxisX.PixelPositionToValue(toshift_x)),
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2);
+                this.ChartAreas[0].AxisX.Minimum += toshift_x > e.X ? v1 : -v1;
+                this.ChartAreas[0].AxisX.Maximum += toshift_x > e.X ? v1 : -v1;
+
+                double v2 = Math.Round(Math.Abs(this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) -
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(toshift_y)),
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisY.Maximum) + 2);
+
+                this.ChartAreas[0].AxisY.Minimum += toshift_y > e.Y ? -v2 : v2;
+                this.ChartAreas[0].AxisY.Maximum += toshift_y > e.Y ? -v2 : v2;
+
+                toshift_x = e.X;
+                toshift_y = e.Y;
+
+                this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+
+                recalc_chart_area = true;
+            }
         }
 
         void MyChart_MouseClick(object sender, MouseEventArgs e)
         {
             if (e.X > options_area.X + 2 && e.X < options_area.X + 20 &&
-                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19)
+                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19 && e.Button == MouseButtons.Left)
             {
                 if (this.Cursor != Cursors.NoMove2D)
                 {
                     this.Cursor = Cursors.NoMove2D;
 
                     zoom_history.Clear();
+                    default_chart_coord = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
+                                                (double)this.ChartAreas[0].AxisX.Maximum,
+                                                (double)this.ChartAreas[0].AxisY.Minimum,
+                                                (double)this.ChartAreas[0].AxisY.Maximum);
                 }  
                 else
                     this.Cursor = Cursors.Default;
             }
 
             if (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
-                e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20)
+                e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20 && e.Button == MouseButtons.Left)
             {
                 if (this.Cursor == Cursors.NoMove2D && zoom_history.Count > 0)
                 {
@@ -273,12 +317,12 @@ namespace ImpulseMaker
             }
 
             if (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
-                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41)
+                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41 && e.Button == MouseButtons.Left)
             {
-                if (this.Cursor == Cursors.NoMove2D && zoom_history.Count > 0)
+                if (this.Cursor == Cursors.NoMove2D)
                 {
-                    this.ChartAreas[0].AxisX.Minimum = zoom_history.First().x_min;
-                    this.ChartAreas[0].AxisX.Maximum = zoom_history.First().x_max;
+                    this.ChartAreas[0].AxisX.Minimum = default_chart_coord.x_min;
+                    this.ChartAreas[0].AxisX.Maximum = default_chart_coord.x_max;
                     this.ChartAreas[0].AxisY.Minimum = Double.NaN;
                     this.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
@@ -291,7 +335,7 @@ namespace ImpulseMaker
             }
 
             if (e.X > options_area.X + 2 + 23 && e.X < options_area.X + 20 + 23 &&
-                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19)
+                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19 && e.Button == MouseButtons.Left)
             {
                 if (this.Cursor != Cursors.Cross)
                     this.Cursor = Cursors.Cross;
@@ -306,24 +350,47 @@ namespace ImpulseMaker
                 (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
                 e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20) ||
                 (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
-                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41)) && !is_in_chart_area)
+                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41)) && !is_in_chart_area && e.Button == MouseButtons.Left)
+            {
+                if (this.Cursor == Cursors.NoMove2D)
+                {
+                    this.ChartAreas[0].AxisX.Minimum = default_chart_coord.x_min;
+                    this.ChartAreas[0].AxisX.Maximum = default_chart_coord.x_max;
+                    this.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                    this.ChartAreas[0].AxisY.Maximum = Double.NaN;
+
+                    this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+
+                    zoom_history.Clear();
+
+                    recalc_chart_area = true;
+                }
+
                 this.Cursor = Cursors.Default;
+            }
+                
         }
 
         void MyChart_MouseDown(object sender, MouseEventArgs e)
         {
-            if (is_in_chart_area && this.Cursor == Cursors.NoMove2D)
+            if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && e.Button == MouseButtons.Left)
             {
                 tozoom_x = e.X;
                 tozoom_y = e.Y;
-                is_mousedown = true;
+                is_L_mouse_down = true;
+            }
+
+            if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && e.Button == MouseButtons.Right)
+            {
+                this.Cursor = Cursors.Hand;
+                toshift_x = e.X;
+                toshift_y = e.Y;
+                is_R_mouse_down = true;
             }
         }
 
         void MyChart_MouseUp(object sender, MouseEventArgs e)
         {
-            is_mousedown = false;
-
             if (is_in_chart_area && this.Cursor == Cursors.NoMove2D)
             {
                 zoom_history.Add(new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
@@ -332,22 +399,30 @@ namespace ImpulseMaker
                                                 (double)this.ChartAreas[0].AxisY.Maximum));
 
                 double v1 = Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2);
                 double v2 = Math.Round(this.ChartAreas[0].AxisX.PixelPositionToValue(zoom_area.X + zoom_area.Width),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2);
                 this.ChartAreas[0].AxisX.Minimum = v1;
                 this.ChartAreas[0].AxisX.Maximum = v2;
 
                 double v3 = Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(zoom_area.Y + zoom_area.Height),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2);
                 double v4 = Math.Round(this.ChartAreas[0].AxisY.PixelPositionToValue(zoom_area.Y),
-                    MathDecimals.GetDecimalPlaces((decimal)this.ChartAreas[0].AxisX.Maximum) + 2);
+                    MathDecimals.GetDecimalPlaces((decimal)(float)this.ChartAreas[0].AxisX.Maximum) + 2);
                 this.ChartAreas[0].AxisY.Minimum = v3;
                 this.ChartAreas[0].AxisY.Maximum = v4;
 
                 this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
 
                 recalc_chart_area = true;
+            }
+
+            if (e.Button == MouseButtons.Left)
+                is_L_mouse_down = false;
+            if (e.Button == MouseButtons.Right && this.Cursor == Cursors.Hand)
+            {
+                this.Cursor = Cursors.NoMove2D;
+                is_R_mouse_down = false;
             }
         }
 
