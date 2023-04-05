@@ -84,7 +84,8 @@ namespace ImpulseMaker
 
         private void init_frame(object sender, EventArgs e)
         {
-            read_csv_file();
+            read_ini_file();
+            SaveAllChannelsButton_Click(sender, e);
 
             ChannelsListBox_fill();
 
@@ -266,62 +267,13 @@ namespace ImpulseMaker
         {
             using (StreamWriter sw = File.CreateText(csv_path))
             {
-                int max_size = 0;
-                string line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
-                for (int j = 0; j < Channels.Count; ++j)
+                for (int i = 0; i < SamplingRateValue.Value; ++i)
                 {
-                    line += Channels[j].name + csv_delimiter.ToString();
-                    if (Channels[j].data.Length > max_size)
-                        max_size = Channels[j].data.Length;
-                }
-                sw.WriteLine(line.Trim(csv_delimiter));
-
-                for (int i = 0; i < max_size; ++i)
-                {
-                    line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
+                    string line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
                     for (int j = 0; j < Channels.Count; ++j)
                         line += ((i < Channels[j].data.Length) ? Channels[j].data[i].ToString() : "")
                             + csv_delimiter.ToString();
                     sw.WriteLine(line.Trim(csv_delimiter));
-                }
-            }
-        }
-
-        private void read_csv_file()
-        {
-            Channels.Clear();
-
-            if (!File.Exists(csv_path))
-            {
-                //MessageBox.Show("Файл \"" + csv_path + "\" не найден");
-                return;
-            }  
-
-            string[] lines = File.ReadAllLines(csv_path);
-            if (lines.Length <= 1)
-                return;
-
-            for (int i = 0,
-                num_channels = lines[0].Split(csv_delimiter).Count() - (is_first_col_sr ? 1 : 0);
-                i < num_channels; ++i)
-            {
-                Channels.Add(new channel());
-                Channels[i].name = lines[0].Split(csv_delimiter)[i + (is_first_col_sr ? 1 : 0)];
-                Channels[i].data = new double[lines.Length - 1];
-            }
-
-            for (int i = 1; i < lines.Length; ++i)
-            {
-                for (int j = 0; j < Channels.Count; ++j)
-                {
-                    try
-                    {
-                        Channels[j].data[i - 1] = Convert.ToDouble(lines[i].Split(csv_delimiter)[j + (is_first_col_sr ? 1 : 0)]);
-                    }
-                    catch
-                    {
-                        return;
-                    }
                 }
             }
         }
@@ -372,15 +324,9 @@ namespace ImpulseMaker
         private void read_ini_channel(string name)
         {
             IniFile MyIni = new IniFile(ini_path);
-
+            
             if (!MyIni.KeyExists("Type", name))
-            {
-                //MessageBox.Show("Ключ \"" + name + "\" в файле \"" + ini_path +  "\" не найден");
                 return;
-            }
-
-            //SignalDurationValue.Value = Convert.ToDecimal(MyIni.Read("SignalDuration", "Main"));
-            //SamplingRateValue.Value = Convert.ToDecimal(MyIni.Read("SamplingRate", "Main"));
 
             switch (Convert.ToInt32(MyIni.Read("Type", name)))
             {
@@ -421,6 +367,26 @@ namespace ImpulseMaker
                     break;
                 default:
                     return;
+            }
+        }
+
+        private void read_ini_file()
+        {
+            Channels.Clear();
+
+            if (!File.Exists(ini_path))
+                return;
+
+            IniFile MyIni = new IniFile(ini_path);
+
+            string[] Sections = MyIni.SectionNames();
+            if (Sections.Count() <= 1)
+                return;
+
+            for (int i = 1; i < Sections.Count(); ++i)
+            {
+                Channels.Add(new channel());
+                Channels[i - 1].name = Sections[i];
             }
         }
 
@@ -1211,9 +1177,9 @@ namespace ImpulseMaker
                     default:
                         return;
                 }
-
-                write_csv_file();
             }
+            
+            write_csv_file();
         }
 
         private void bgw_WorkComplete(object sender, RunWorkerCompletedEventArgs e)
@@ -1262,8 +1228,12 @@ namespace ImpulseMaker
 
             key.Close();
 
-            //SignalDurationValue.Value = Convert.ToDecimal(new IniFile(ini_path).Read("SignalDuration", "Main")); TODO: убрать ошику при прочтении длина сигнала < периода пилы
-            SamplingRateValue.Value = Convert.ToDecimal(new IniFile(ini_path).Read("SamplingRate", "Main"));
+            try
+            {
+                SignalDurationValue.Value = Convert.ToDecimal(new IniFile(ini_path).Read("SignalDuration", "Main"));
+                SamplingRateValue.Value = Convert.ToDecimal(new IniFile(ini_path).Read("SamplingRate", "Main"));
+            }
+            catch { }
 
             init_frame(sender, e);
         }
