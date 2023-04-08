@@ -464,16 +464,15 @@ namespace ImpulseMaker
             // 
             // ChannelsListBox
             // 
-            this.ChannelsListBox.FormattingEnabled = true;
-            this.ChannelsListBox.item_to_highlight = -1;
+            this.ChannelsListBox.BackColor = System.Drawing.SystemColors.Control;
             this.ChannelsListBox.Location = new System.Drawing.Point(629, 172);
             this.ChannelsListBox.Name = "ChannelsListBox";
-            this.ChannelsListBox.SelectionMode = System.Windows.Forms.SelectionMode.MultiExtended;
+            this.ChannelsListBox.selected_item = -1;
             this.ChannelsListBox.Size = new System.Drawing.Size(164, 238);
             this.ChannelsListBox.TabIndex = 10;
             this.ChannelsListBox.MoveSelectedUp += new System.EventHandler(this.ChannelsListBox_MoveSelectedUp);
             this.ChannelsListBox.MoveSelectedDown += new System.EventHandler(this.ChannelsListBox_MoveSelectedDown);
-            this.ChannelsListBox.SelectedIndexChanged += new System.EventHandler(this.ChannelsListBox_SelectionChanged);
+            this.ChannelsListBox.SelectionChanged += new System.EventHandler(this.ChannelsListBox_SelectionChanged);
             // 
             // SignalDurationValue
             // 
@@ -525,6 +524,11 @@ namespace ImpulseMaker
             // RampBeginValue
             // 
             this.RampBeginValue.DecimalPlaces = 1;
+            this.RampBeginValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
             this.RampBeginValue.Location = new System.Drawing.Point(9, 31);
             this.RampBeginValue.Minimum = new decimal(new int[] {
             100,
@@ -569,6 +573,11 @@ namespace ImpulseMaker
             // RampPeakValue
             // 
             this.RampPeakValue.DecimalPlaces = 1;
+            this.RampPeakValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
             this.RampPeakValue.Location = new System.Drawing.Point(9, 72);
             this.RampPeakValue.Minimum = new decimal(new int[] {
             100,
@@ -612,6 +621,11 @@ namespace ImpulseMaker
             // ImpulseBaseValue
             // 
             this.ImpulseBaseValue.DecimalPlaces = 1;
+            this.ImpulseBaseValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
             this.ImpulseBaseValue.Location = new System.Drawing.Point(9, 31);
             this.ImpulseBaseValue.Minimum = new decimal(new int[] {
             100,
@@ -632,6 +646,11 @@ namespace ImpulseMaker
             // ImpulseLevelValue
             // 
             this.ImpulseLevelValue.DecimalPlaces = 1;
+            this.ImpulseLevelValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
             this.ImpulseLevelValue.Location = new System.Drawing.Point(9, 72);
             this.ImpulseLevelValue.Minimum = new decimal(new int[] {
             100,
@@ -690,7 +709,8 @@ namespace ImpulseMaker
             this.WholeSignalChart.ChartAreas.Add(chartArea1);
             this.WholeSignalChart.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.WholeSignalChart.enable_add_point = false;
-            this.WholeSignalChart.is_in_chart_area = false;
+            this.WholeSignalChart.is_able_to_choose = true;
+            legend1.IsTextAutoFit = false;
             legend1.Name = "Legend1";
             this.WholeSignalChart.Legends.Add(legend1);
             this.WholeSignalChart.Location = new System.Drawing.Point(0, 411);
@@ -717,7 +737,7 @@ namespace ImpulseMaker
             chartArea2.Name = "ChartArea1";
             this.OneSegmentChart.ChartAreas.Add(chartArea2);
             this.OneSegmentChart.enable_add_point = true;
-            this.OneSegmentChart.is_in_chart_area = false;
+            this.OneSegmentChart.is_able_to_choose = false;
             legend2.Name = "Legend1";
             this.OneSegmentChart.Legends.Add(legend2);
             this.OneSegmentChart.Location = new System.Drawing.Point(0, 34);
@@ -754,8 +774,6 @@ namespace ImpulseMaker
             this.Name = "Form1";
             this.Text = "SignalMaker";
             this.Load += new System.EventHandler(this.Form1_Load);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.OnMouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.OnMouseMove);
             this.SignalTypeTabControl.ResumeLayout(false);
             this.RampTabPage.ResumeLayout(false);
             this.RampTabPage.PerformLayout();
@@ -821,7 +839,6 @@ namespace ImpulseMaker
         private System.Windows.Forms.Label SaveImpulseChannelLabel;
         private System.Windows.Forms.CheckBox ZeroEndingRampCheckBox;
         private System.Windows.Forms.CheckBox ZeroEndingImpulseCheckBox;
-        private ImpulseMaker.MyListBox ChannelsListBox;
         private System.Windows.Forms.Button DeleteRampChannelButton;
         private System.Windows.Forms.Button DeleteImpulseChannelButton;
         private System.Windows.Forms.Button SaveAllChannelsButton;
@@ -833,6 +850,7 @@ namespace ImpulseMaker
         private System.Windows.Forms.ToolStripMenuItem cSVFilePathToolStripMenuItem;
         private System.Windows.Forms.ToolTip toolTip1;
         private System.Windows.Forms.ToolTip toolTip2;
+        private MyListBox ChannelsListBox;
     }
 }
 

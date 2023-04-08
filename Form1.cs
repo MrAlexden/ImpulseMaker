@@ -17,6 +17,7 @@ using static System.Windows.Forms.LinkLabel;
 using System.Xml.Linq;
 using System.Threading;
 using Microsoft.Win32;
+using System.Runtime.InteropServices;
 
 namespace ImpulseMaker
 {
@@ -36,12 +37,13 @@ namespace ImpulseMaker
         static string ini_file_name = "settings.ini",
             csv_file_name = "scenario.csv";
         string ini_path = ini_file_name,
-            csv_path = csv_file_name;
+            csv_path = csv_file_name,
+            ch_name_to_save;
         private List<channel> Channels = new List<channel>();
         char csv_delimiter = ';';
         bool is_first_col_sr = true,
             is_csv_empty_on_init = false;
-        Random RandGen = new Random();
+        Random RandGen = new Random(11);
         NumericUpDown nud_Min = new NumericUpDown();
         NumericUpDown nud_Max = new NumericUpDown();
 
@@ -68,15 +70,6 @@ namespace ImpulseMaker
 
             HookupMouseEnterEvents(this);
 
-            IniFile MyIni = new IniFile(ini_path);
-            if (MyIni.KeyExists("SignalDuration", "Main") &&
-                MyIni.KeyExists("SamplingRate", "Main"))
-
-            {
-                SignalDurationValue.Value = Convert.ToDecimal(MyIni.Read("SignalDuration", "Main"));
-                SamplingRateValue.Value = Convert.ToDecimal(MyIni.Read("SamplingRate", "Main"));
-            }
-
             init_frame(sender, e);
         }
 
@@ -84,7 +77,11 @@ namespace ImpulseMaker
 
         private void init_frame(object sender, EventArgs e)
         {
-            read_ini_file();
+            if (read_ini_file() < 0)
+            {
+                IniFile MyIni = new IniFile(ini_path); //если не нашли файла - создаем
+            }
+
             SaveAllChannelsButton_Click(sender, e);
 
             ChannelsListBox_fill();
@@ -100,7 +97,7 @@ namespace ImpulseMaker
                 WholeSignalChart.Series.Clear();
                 if (WholeSignalChart.Series.IsUniqueName(RampChannelName.Text))
                     WholeSignalChart.Series.Add(RampChannelName.Text);
-                ChannelsListBox.SelectedIndex = 0;
+                ChannelsListBox.selected_item = 0;
 
                 RampTabPage_Enter(sender, e);
 
@@ -113,7 +110,7 @@ namespace ImpulseMaker
 
                 redraw_whole_chart();
 
-                ChannelsListBox.SelectedIndex = 0;
+                ChannelsListBox.selected_item = 0;
             }
 
             RampPeakTrackerLabel.Text = ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value).ToString();
@@ -142,18 +139,16 @@ namespace ImpulseMaker
 
         private void SignalDuration_ValueChanged(object sender, EventArgs e)
         {
-            if (ChannelsListBox.SelectedIndex < 0 || ChannelsListBox.Items.Count <= 0)
+            if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
                 return;
 
             redraw_whole_chart();
 
-            int si = ChannelsListBox.SelectedIndex;
-            ChannelsListBox.ClearSelected();
-            ChannelsListBox.SelectedIndex = si;
+            int si = ChannelsListBox.selected_item;
+            ChannelsListBox.clear_selection();
+            ChannelsListBox.selected_item = si;
 
-            IniFile MyIni = new IniFile(ini_path);
-            switch (SignalTypeTabControl.SelectedIndex
-                /*Convert.ToInt32(MyIni.Read("Type", Channels[ChannelsListBox.SelectedIndex].name))*/)
+            switch (SignalTypeTabControl.SelectedIndex)
             {
                 case 0:
                     ramp_graph(sender, e);
@@ -218,6 +213,58 @@ namespace ImpulseMaker
             }
         }
 
+        private void bgw_SaveChannel(object sender, DoWorkEventArgs e)
+        {
+            IniFile MyIni = new IniFile(ini_path);
+
+            if (!MyIni.KeyExists("Type", ch_name_to_save))
+                return;
+
+            double[] data = new double[0];
+
+            switch (Convert.ToInt32(MyIni.Read("Type", ch_name_to_save)))
+            {
+                case 0:
+                    {
+                        double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
+                                            Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
+                                            Convert.ToDouble(MyIni.Read("Period", ch_name_to_save)),
+                                            (int)(Convert.ToDecimal(RampPeakTrackerLabel.Text) /
+                                            Convert.ToDecimal(RampPeriodValue.Value) * 100),
+                                            Convert.ToDouble(MyIni.Read("BeginValue", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("PeakValue", ch_name_to_save)),
+                                            Convert.ToInt32(MyIni.Read("IsZeroEnding", ch_name_to_save)) == 1 ? 1 : 0};
+
+                        if (calculate_ramp_channel(ref data, ref controls) == 0)
+                            save_csv_channel(ch_name_to_save, ref data);
+                        break;
+                    }
+                case 1:
+                    {
+                        double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
+                                            Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
+                                            Convert.ToDouble(MyIni.Read("Period", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("LeftPos", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("RightPos", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("Min", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("Max", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("BaseValue", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("LevelValue", ch_name_to_save)),
+                                            Convert.ToInt32(MyIni.Read("IsZeroEnding", ch_name_to_save)) == 1 ? 1 : 0};
+
+                        if (calculate_impulse_channel(ref data, ref controls) == 0)
+                            save_csv_channel(ch_name_to_save, ref data);
+                        break;
+                    }
+                case 2:
+                    break;
+                default:
+                    return;
+            }
+
+            write_csv_file();
+        }
+
         #endregion
 
         #region CSV
@@ -267,7 +314,7 @@ namespace ImpulseMaker
         {
             using (StreamWriter sw = File.CreateText(csv_path))
             {
-                for (int i = 0; i < SamplingRateValue.Value; ++i)
+                for (int i = 0; i < (SamplingRateValue.Value * SignalDurationValue.Value); ++i)
                 {
                     string line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
                     for (int j = 0; j < Channels.Count; ++j)
@@ -294,6 +341,7 @@ namespace ImpulseMaker
             switch (SignalTypeTabControl.SelectedIndex)
             {
                 case 0:
+                    MyIni.Write("Index", ChannelsListBox.Items.IndexOf(name).ToString(), name);
                     MyIni.Write("IsCustom", "0", name);
                     MyIni.Write("Type", SignalTypeTabControl.SelectedIndex.ToString(), name);
                     MyIni.Write("BeginValue", RampBeginValue.Value.ToString(), name);
@@ -303,6 +351,7 @@ namespace ImpulseMaker
                     MyIni.Write("IsZeroEnding", (ZeroEndingRampCheckBox.Checked) ? "1" : "0", name);
                     break;
                 case 1:
+                    MyIni.Write("Index", ChannelsListBox.Items.IndexOf(name).ToString(), name);
                     MyIni.Write("IsCustom", "0", name);
                     MyIni.Write("Type", SignalTypeTabControl.SelectedIndex.ToString(), name);
                     MyIni.Write("BaseValue", ImpulseBaseValue.Value.ToString(), name);
@@ -370,24 +419,47 @@ namespace ImpulseMaker
             }
         }
 
-        private void read_ini_file()
+        private int read_ini_file()
         {
             Channels.Clear();
 
             if (!File.Exists(ini_path))
-                return;
+                return -1;
 
             IniFile MyIni = new IniFile(ini_path);
+            if (MyIni.KeyExists("SignalDuration", "Main") &&
+                MyIni.KeyExists("SamplingRate", "Main"))
+            {
+                SignalDurationValue.Value = Convert.ToDecimal(MyIni.Read("SignalDuration", "Main"));
+                SamplingRateValue.Value = Convert.ToDecimal(MyIni.Read("SamplingRate", "Main"));
+            }
 
             string[] Sections = MyIni.SectionNames();
+                string err = "";
             if (Sections.Count() <= 1)
-                return;
+                return -1;
+
+            Channels.AddRange(new channel[Sections.Count() - 1]);
 
             for (int i = 1; i < Sections.Count(); ++i)
             {
-                Channels.Add(new channel());
-                Channels[i - 1].name = Sections[i];
+                try
+                {
+                    Channels[Convert.ToInt32(MyIni.Read("Index", Sections[i]))] = new channel { name = Sections[i], data = new double[0] };
+                }
+                catch
+                {
+                    err += "Ошибка при чтении ключа \"Index\" в секции " + "\"" + Sections[i] + "\"\n";
+                }
             }
+
+            if (err.Length > 0)
+            {
+                MessageBox.Show(err);
+                return -1;
+            }
+
+            return 0;
         }
 
         #endregion
@@ -412,7 +484,7 @@ namespace ImpulseMaker
 
             nud_Min.Minimum = (decimal)SeveralSlidersImpulseTrackBar.Min;
             nud_Min.Maximum = (decimal)SeveralSlidersImpulseTrackBar.SelectedMax;
-            
+
             this.Controls.Add(nud_Max);
             nud_Max.BringToFront();
 
@@ -493,19 +565,19 @@ namespace ImpulseMaker
             Series series;
             if (name == "")
             {
-                if (ChannelsListBox.SelectedIndex < 0 || ChannelsListBox.Items.Count <= 0)
+                if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
                     return;
                 try
                 {
-                    series = ChannelsListBox.SelectedIndex > 0 ? WholeSignalChart.Series[ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString()] : WholeSignalChart.Series[0];
+                    series = ChannelsListBox.selected_item > 0 ? WholeSignalChart.Series[ChannelsListBox.Items
+                        [ChannelsListBox.selected_item].ToString()] : WholeSignalChart.Series[0];
                 }
                 catch
                 {
                     if (WholeSignalChart.Series.IsUniqueName(ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString()))
+                        [ChannelsListBox.selected_item].ToString()))
                         WholeSignalChart.Series.Add(ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString());
+                        [ChannelsListBox.selected_item].ToString());
                     //WholeSignalChart.Series.Last().Color =
                     //    Color.FromArgb(RandGen.Next(40, 210), RandGen.Next(60, 245), RandGen.Next(50, 220));
                     series = WholeSignalChart.Series.Last();
@@ -600,24 +672,25 @@ namespace ImpulseMaker
 
         private void SaveRampChannelButton_Click(object sender, EventArgs e)
         {
-            double[] data = new double[0];
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
-            double[] controls = {(double)SignalDurationValue.Value,
-                                (double)SamplingRateValue.Value,
-                                (double)RampPeriodValue.Value,
-                                (double)RampPeakTrackBar.Value,
-                                (double)RampBeginValue.Value,
-                                (double)RampPeakValue.Value,
-                                ZeroEndingRampCheckBox.Checked ? 1 : 0};
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveChannel);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
-            if (calculate_ramp_channel(ref data, ref controls) == 0)
-                write_ini_channel(RampChannelName.Text);
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
-            save_csv_channel(RampChannelName.Text, ref data);
-            write_csv_file();
+            double[] r = new double[0];
+            save_csv_channel(RampChannelName.Text, ref r);
+            ch_name_to_save = RampChannelName.Text;
+            write_ini_channel(RampChannelName.Text);
 
-            ChannelsListBox.ClearSelected();
-            ChannelsListBox.SelectedIndex = ChannelsListBox.FindByName(RampChannelName.Text);
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.clear_selection();
+            ChannelsListBox.selected_item = ChannelsListBox.FindByName(RampChannelName.Text);
         }
 
         private void ZeroEndingRampCheckBox_CheckedChange(object sender, EventArgs e)
@@ -626,13 +699,23 @@ namespace ImpulseMaker
         }
 
         private void DeleteRampChannelButton_Click(object sender, EventArgs e)
-        {
+        {            
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
             IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
             MyIni.DeleteSection(RampChannelName.Text);
             delete_csv_channel(RampChannelName.Text);
-            
-            write_csv_file();
+
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.selected_item = 0;
         }
 
         #endregion
@@ -684,19 +767,19 @@ namespace ImpulseMaker
             Series series;
             if (name == "")
             {
-                if (ChannelsListBox.SelectedIndex < 0 || ChannelsListBox.Items.Count <= 0)
+                if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
                     return;
                 try
                 {
-                    series = ChannelsListBox.SelectedIndex > 0 ? WholeSignalChart.Series[ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString()] : WholeSignalChart.Series[0];
+                    series = ChannelsListBox.selected_item > 0 ? WholeSignalChart.Series[ChannelsListBox.Items
+                        [ChannelsListBox.selected_item].ToString()] : WholeSignalChart.Series[0];
                 }
                 catch
                 {
                     if (WholeSignalChart.Series.IsUniqueName(ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString()))
+                        [ChannelsListBox.selected_item].ToString()))
                         WholeSignalChart.Series.Add(ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString());
+                        [ChannelsListBox.selected_item].ToString());
                     //WholeSignalChart.Series.Last().Color =
                     //    Color.FromArgb(RandGen.Next(40, 210), RandGen.Next(60, 245), RandGen.Next(50, 220));
                     series = WholeSignalChart.Series.Last();
@@ -835,27 +918,25 @@ namespace ImpulseMaker
 
         private void SaveImpulseChannelButton_Click(object sender, EventArgs e)
         {
-            double[] data = new double[0];
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
-            double[] controls = {(double)SignalDurationValue.Value,
-                                (double)SamplingRateValue.Value,
-                                (double)ImpulsePeriodValue.Value,
-                                (double)SeveralSlidersImpulseTrackBar.SelectedMin,
-                                (double)SeveralSlidersImpulseTrackBar.SelectedMax,
-                                (double)SeveralSlidersImpulseTrackBar.Min,
-                                (double)SeveralSlidersImpulseTrackBar.Max,
-                                (double)ImpulseBaseValue.Value,
-                                (double)ImpulseLevelValue.Value,
-                                ZeroEndingImpulseCheckBox.Checked ? 1 : 0};
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveChannel);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
-            if (calculate_impulse_channel(ref data, ref controls) == 0)
-                write_ini_channel(ImpulseChannelName.Text);
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
-            save_csv_channel(ImpulseChannelName.Text, ref data);
-            write_csv_file();
+            double[] r = new double[0];
+            save_csv_channel(ImpulseChannelName.Text, ref r);
+            ch_name_to_save = ImpulseChannelName.Text;
+            write_ini_channel(ImpulseChannelName.Text);
 
-            ChannelsListBox.ClearSelected();
-            ChannelsListBox.SelectedIndex = ChannelsListBox.FindByName(ImpulseChannelName.Text);
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.clear_selection();
+            ChannelsListBox.selected_item = ChannelsListBox.FindByName(ImpulseChannelName.Text);
         }
 
         private void ZeroEndingImpulseCheckBox_CheckedChange(object sender, EventArgs e)
@@ -865,12 +946,22 @@ namespace ImpulseMaker
 
         private void DeleteImpulseChannelButton_Click(object sender, EventArgs e)
         {
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
             IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
             MyIni.DeleteSection(ImpulseChannelName.Text);
             delete_csv_channel(ImpulseChannelName.Text);
 
-            write_csv_file();
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.selected_item = 0;
         }
 
         #endregion
@@ -958,19 +1049,26 @@ namespace ImpulseMaker
 
         private void ChannelsListBox_SelectionChanged(object sender, EventArgs e)
         {
-            if (ChannelsListBox.SelectedIndex < 0 || ChannelsListBox.Items.Count <= 0)
+            if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
+            {
+                WholeSignalChart.SetSelectedSeries(ChannelsListBox.selected_item);
                 return;
+            }
 
-            read_ini_channel(Channels[ChannelsListBox.SelectedIndex].name);
+            read_ini_channel(Channels[ChannelsListBox.selected_item].name);
 
             try
             {
-                RampChannelName.Text = Channels[ChannelsListBox.SelectedIndex].name;
-                ImpulseChannelName.Text = Channels[ChannelsListBox.SelectedIndex].name;
+                RampChannelName.Text = Channels[ChannelsListBox.selected_item].name;
+                ImpulseChannelName.Text = Channels[ChannelsListBox.selected_item].name;
 
-                OneSegmentChart.Series[0].Name = Channels[ChannelsListBox.SelectedIndex].name;
-                OneSegmentChart.Series[0].Color = WholeSignalChart.Series[ChannelsListBox.Items
-                        [ChannelsListBox.SelectedIndex].ToString()].Color;
+                OneSegmentChart.Series[0].Name = Channels[ChannelsListBox.selected_item].name;
+                OneSegmentChart.Series[0].Color = Color.FromArgb(255, WholeSignalChart.Series[ChannelsListBox.Items
+                        [ChannelsListBox.selected_item].ToString()].Color);
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+
+                WholeSignalChart.SetSelectedSeries(WholeSignalChart.Series.IndexOf(Channels[ChannelsListBox.selected_item].name));
             }
             catch
             {
@@ -980,16 +1078,44 @@ namespace ImpulseMaker
 
         private void ChannelsListBox_MoveSelectedUp(object sender, EventArgs e)
         {
-            this.Swap(ref Channels, ChannelsListBox.SelectedIndex, ChannelsListBox.SelectedIndex - 1);
-            redraw_whole_chart();
-            write_csv_file();
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            int si = ChannelsListBox.get_item_to_move();
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
+            MyIni.Write("Index", (si - 1).ToString(), ChannelsListBox.Items[si - 1].ToString());
+            MyIni.Write("Index", (si).ToString(), ChannelsListBox.Items[si].ToString());
+
+            this.Swap(ref Channels, si, si - 1);
+
+            bgw.RunWorkerAsync();
         }
 
         private void ChannelsListBox_MoveSelectedDown(object sender, EventArgs e)
         {
-            this.Swap(ref Channels, ChannelsListBox.SelectedIndex, ChannelsListBox.SelectedIndex - 1);
-            redraw_whole_chart();
-            write_csv_file();
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            int si = ChannelsListBox.get_item_to_move();
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
+            MyIni.Write("Index", (si + 1).ToString(), ChannelsListBox.Items[si + 1].ToString());
+            MyIni.Write("Index", (si).ToString(), ChannelsListBox.Items[si].ToString());
+
+            this.Swap(ref Channels, si, si + 1);
+
+            bgw.RunWorkerAsync();
         }
 
         #endregion
@@ -1142,6 +1268,7 @@ namespace ImpulseMaker
                 {
                     case 0:
                         {
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ch.name).ToString(), ch.name);
                             double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
                                                 Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
                                                 Convert.ToDouble(MyIni.Read("Period", ch.name)),
@@ -1157,6 +1284,7 @@ namespace ImpulseMaker
                         }
                     case 1:
                         {
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ch.name).ToString(), ch.name);
                             double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
                                                 Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
                                                 Convert.ToDouble(MyIni.Read("Period", ch.name)),

@@ -9,23 +9,32 @@ using System.Windows.Forms;
 using System.Windows.Forms.DataVisualization.Charting;
 using System.Numerics;
 using System.ComponentModel;
+using System.Reflection;
 
 namespace ImpulseMaker
 {
     internal class MyChart : Chart
     {
-        int highlightbutton = -1;
+        public event EventHandler SelectedSeriesChanged;
+
+        int highlightbutton = -1,
+            item_to_highlight = -1,
+            s_s = -1;
         RectangleF chart_area,
             options_area,
             zoom_options_area,
-            zoom_area;
+            zoom_area,
+            series_selection_area;
         bool is_in_ca = false,
             is_left = true,
             is_enter = true,
             is_L_mouse_down = false,
             is_R_mouse_down = false,
             recalc_chart_area = false,
-            e_a_p = true;
+            e_a_p = true,
+            is_a_t_ch = true,
+            is_selection_set_outside = false,
+            is_resized = false;
         float highligt_x,
             highligt_y,
             tozoom_x,
@@ -34,6 +43,7 @@ namespace ImpulseMaker
             toshift_y;
         List<chart_coord> zoom_history = new List<chart_coord>();
         chart_coord default_chart_coord;
+        SizeF text_size = new SizeF();
 
         struct chart_coord
         {
@@ -50,7 +60,22 @@ namespace ImpulseMaker
             public double y_max;
         }
 
-        public bool is_in_chart_area
+        int selected_series
+        {
+            get { return s_s; }
+            set
+            {
+                if (s_s != value)
+                {
+                    s_s = value;
+                    if (SelectedSeriesChanged != null && !is_selection_set_outside)
+                        SelectedSeriesChanged(this, null);
+                    highlight_series(value);
+                }
+            }
+        }
+
+        bool is_in_chart_area
         {
             get { return is_in_ca; }
             set 
@@ -67,6 +92,12 @@ namespace ImpulseMaker
             set { e_a_p = value; Invalidate(); }
         }
 
+        public bool is_able_to_choose
+        {
+            get { return is_a_t_ch; }
+            set { is_a_t_ch = value; Invalidate(); }
+        }
+
         public MyChart()
         {
             //avoid flickering
@@ -80,22 +111,22 @@ namespace ImpulseMaker
             this.MouseClick += new MouseEventHandler(MyChart_MouseClick);
             this.MouseDown += new MouseEventHandler(MyChart_MouseDown);
             this.MouseUp += new MouseEventHandler(MyChart_MouseUp);
+            this.Resize += new EventHandler(MyChart_Resized);
         }
 
-        void MyChart_PostPaint(object sender, System.Windows.Forms.DataVisualization.Charting.ChartPaintEventArgs e)
+        void MyChart_Resized(object sender, EventArgs e)
         {
+            is_resized = true;
+        }
+
+        void MyChart_PostPaint(object sender, ChartPaintEventArgs e)
+        {
+            /* Костыль, нужный чтобы функция рисовки не вызывалась количество раз, равное количеству элементов на графике */
             if (e.ChartElement != this)
                 return;
 
-            if (is_enter)
-            {
-                options_area = new RectangleF((float)(this.Width - (enable_add_point ? 80 : 57)),
-                    (float)(this.Height * 0.85),
-                    enable_add_point ? 46 : 23, 20);
-                zoom_options_area = new RectangleF((float)(options_area.X + 1), (float)(options_area.Y - 46), 20, 46);
-            }
-
-            if (is_enter || recalc_chart_area)
+            /* При входе мыши на контрол или при команде о пересчете - пересчитываем главные области */
+            if (is_enter || recalc_chart_area || is_resized)
             {
                 float x_left = (float)e.ChartGraphics.GetPositionFromAxis(this.ChartAreas[0].Name,
                     System.Windows.Forms.DataVisualization.Charting.AxisName.X, this.ChartAreas[0].AxisX.Minimum);
@@ -105,13 +136,54 @@ namespace ImpulseMaker
                     System.Windows.Forms.DataVisualization.Charting.AxisName.Y, this.ChartAreas[0].AxisY.Maximum);
                 float y_bottom = (float)e.ChartGraphics.GetPositionFromAxis(this.ChartAreas[0].Name,
                     System.Windows.Forms.DataVisualization.Charting.AxisName.Y, this.ChartAreas[0].AxisY.Minimum);
+
                 chart_area = e.ChartGraphics.GetAbsoluteRectangle(new RectangleF(new PointF(x_left, y_top),
                     new SizeF(x_right - x_left, y_bottom - y_top)));
+                text_size = TextRenderer.MeasureText(find_longest_name(), this.Legends[0].Font);
+                text_size.Height = 14;
+                options_area = new RectangleF((float)(this.Width - (enable_add_point ? 80 : 57)),
+                    (float)(this.Height * 0.85),
+                    enable_add_point ? 46 : 23, 20);
+                zoom_options_area = new RectangleF((float)(options_area.X + 1), (float)(options_area.Y - 46), 20, 46);
+                series_selection_area = new RectangleF(chart_area.X + chart_area.Width +
+                                                       (this.Width - chart_area.X - chart_area.Width) * 0.5f -
+                                                       (text_size.Width + 30) * 0.5f,
+                                                       this.Legends[0].Position.Y - (this.Legends[0].Position.Y - chart_area.Y) * 0.5f + 3,
+                                                       text_size.Width + 45,
+                                                       text_size.Height * this.Series.Count);
 
                 is_enter = false;
                 recalc_chart_area = false;
+                is_resized = false;
             }
 
+            /* Выделяем серию в легенде, на которую указывает курсор */
+            if (item_to_highlight >= 0 && is_able_to_choose)
+            {
+                SizeF size = TextRenderer.MeasureText(this.Series[item_to_highlight].Name, this.Legends[0].Font);
+                size.Height = 14;
+                LinearGradientBrush myVerticalGradient =
+                    new LinearGradientBrush(new PointF(series_selection_area.X + series_selection_area.Width, series_selection_area.Y),
+                    new PointF(size.Width + 45 >= series_selection_area.Width ? series_selection_area.X + size.Width : series_selection_area.X + size.Width + 45,
+                    series_selection_area.Y), Color.LightGray, this.Legends[0].BackColor);
+                e.ChartGraphics.Graphics.FillRectangle(myVerticalGradient,
+                    series_selection_area.X + size.Width + 46,
+                    series_selection_area.Y + size.Height * item_to_highlight,
+                    series_selection_area.Width - size.Width - 45,
+                    size.Height);
+                e.ChartGraphics.Graphics.DrawRectangle(Pens.LightGray,
+                    series_selection_area.X,
+                    series_selection_area.Y + size.Height * item_to_highlight,
+                    series_selection_area.Width,
+                    size.Height - 1);
+            }
+
+            /* Подсвечиваем выбранную серию в легенде */
+            if (selected_series >= 0 && is_able_to_choose)
+                e.ChartGraphics.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(25, Color.Red)), new RectangleF(series_selection_area.X,
+                    series_selection_area.Y + selected_series * text_size.Height, series_selection_area.Width, text_size.Height));
+
+            /* Когда выбрана опция зума - подрисовываем дополнительные кнопки, относящиеся к этой опции */
             if (this.Cursor == Cursors.NoMove2D)
             {
                 Rectangle zoom_options = Rectangle.Round(zoom_options_area);
@@ -137,6 +209,7 @@ namespace ImpulseMaker
                     GraphicsUnit.Pixel);
             }
 
+            /* Рисуем область опций и кнопку зума */
             Rectangle options = Rectangle.Round(options_area);
             GraphicsPath path = RoundedRectangle.Create(options, 3);
             e.ChartGraphics.Graphics.FillPath(Brushes.LightGray, path);
@@ -150,6 +223,7 @@ namespace ImpulseMaker
                 new Rectangle(0, 0, Properties.Resources.Zoom_in.Width, Properties.Resources.Zoom_in.Height),
                 GraphicsUnit.Pixel);
 
+            /* Рисуем кнопку добавления точек только если это предусмотрено настройкой */
             if (enable_add_point)
             {
                 Rectangle option_addpoint = new Rectangle(new Point(option_zoom.X + 23, option_zoom.Y),
@@ -162,6 +236,7 @@ namespace ImpulseMaker
                     GraphicsUnit.Pixel);
             }
 
+            /* Рисуем направляющие если курсор в области графика */
             if (is_in_chart_area && !is_left)
             {
                 float[] dashValues = { 5, 5 };
@@ -179,6 +254,7 @@ namespace ImpulseMaker
                     this.Font, Brushes.Black, chart_area.X + chart_area.Width + 5, highligt_y);
             }
 
+            /* Отрисовываем область приближения для наглядности, если пользователь выбрал эту функцию */
             if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && is_L_mouse_down)
             {
                 e.ChartGraphics.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(25, Color.Red)), zoom_area);
@@ -187,6 +263,23 @@ namespace ImpulseMaker
 
         void MyChart_MouseMove(object sender, MouseEventArgs e)
         {
+            /* Зашел ли курсор в область легенды */
+            if (e.X > series_selection_area.X && e.X < series_selection_area.X + series_selection_area.Width &&
+                e.Y > series_selection_area.Y && e.Y < series_selection_area.Y + series_selection_area.Height && is_able_to_choose)
+            {
+                item_to_highlight = (int)((float)(e.Y - series_selection_area.Y) / text_size.Height);
+                Invalidate(Rectangle.Ceiling(series_selection_area));
+            }
+            else
+            {
+                if (item_to_highlight != -1)
+                {
+                    item_to_highlight = -1;
+                    Invalidate(Rectangle.Ceiling(series_selection_area));
+                }
+            }
+
+            /* Зашел ли курсор в область хитбокса опций, выбираем какую кнопку подсвечивать */
             if (e.X > options_area.X + 2 && e.X < options_area.X + 20 &&
                 e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19)
             {
@@ -232,6 +325,7 @@ namespace ImpulseMaker
                     (int)(zoom_options_area.Y + zoom_options_area.Height)));
             }
 
+            /* Зашел ли курсор в область график. нужно для отрисовки направляющих */
             if (e.X > chart_area.X && e.X < chart_area.X + chart_area.Width &&
                 e.Y > chart_area.Y && e.Y < chart_area.Y + chart_area.Height)
             {
@@ -243,12 +337,14 @@ namespace ImpulseMaker
             }  
             else is_in_chart_area = false;
 
+            /* Если пользуемся функцией приближения, то пересчитываем отризовку области зума(для наглядности) */
             if (this.Cursor == Cursors.NoMove2D)
             {
                 zoom_area = new RectangleF(tozoom_x > e.X ? e.X : tozoom_x,
                     tozoom_y > e.Y ? e.Y : tozoom_y, Math.Abs(e.X - tozoom_x), Math.Abs(e.Y - tozoom_y));
             }
 
+            /* Если пользуемся функцией передвигания графика, то пересчитаваем границы осей */
             if (is_in_chart_area && this.Cursor == Cursors.Hand)
             {
                 double v1 = Math.Round(Math.Abs(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) -
@@ -275,6 +371,29 @@ namespace ImpulseMaker
 
         void MyChart_MouseClick(object sender, MouseEventArgs e)
         {
+            /* Какую серию выбирает пользователь при нажатии на легенду */
+            if (item_to_highlight >= 0 && is_able_to_choose)
+                selected_series = item_to_highlight;
+
+            /* Было ли нажатие вне легенды, вне области опций и вне области графика чтобы снять выделение */
+            if (!((e.X > series_selection_area.X && e.X < series_selection_area.X + series_selection_area.Width &&
+                e.Y > series_selection_area.Y && e.Y < series_selection_area.Y + series_selection_area.Height) ||
+                (e.X > options_area.X + 2 && e.X < options_area.X + 20 &&
+                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19) ||
+                (e.X > options_area.X + 2 + 23 && e.X < options_area.X + 20 + 23 &&
+                e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19) ||
+                (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
+                e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20) ||
+                (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
+                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41) ||
+                is_in_chart_area) && 
+                e.Button == MouseButtons.Left && selected_series != -1 && is_able_to_choose)
+            {
+                selected_series = -1;
+                Invalidate(Rectangle.Ceiling(series_selection_area));
+            }
+
+            /* Было ли нажатие на функцию приближения */
             if (e.X > options_area.X + 2 && e.X < options_area.X + 20 &&
                 e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19 && e.Button == MouseButtons.Left)
             {
@@ -292,6 +411,7 @@ namespace ImpulseMaker
                     this.Cursor = Cursors.Default;
             }
 
+            /* Было ли нажатие на функцию приближение на шаг назад */
             if (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
                 e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20 && e.Button == MouseButtons.Left)
             {
@@ -316,6 +436,7 @@ namespace ImpulseMaker
                 }
             }
 
+            /* Было ли нажатие на функцию вернуть график к начальной области */
             if (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
                 e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41 && e.Button == MouseButtons.Left)
             {
@@ -334,6 +455,7 @@ namespace ImpulseMaker
                 }
             }
 
+            /* TODO: Было ли нажатие на функцию добавить точки */
             if (e.X > options_area.X + 2 + 23 && e.X < options_area.X + 20 + 23 &&
                 e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19 && e.Button == MouseButtons.Left)
             {
@@ -343,6 +465,7 @@ namespace ImpulseMaker
                     this.Cursor = Cursors.Default;
             }
 
+            /* Было ли нажатие где-либо вне хитбокса опций, чтобы отказаться от выбора инструмента */
             if (!((e.X > options_area.X + 2 && e.X < options_area.X + 20 &&
                 e.Y > options_area.Y + 1 && e.Y < options_area.Y + 19) ||
                 (e.X > options_area.X + 2 + 23 && e.X < options_area.X + 20 + 23 &&
@@ -350,7 +473,10 @@ namespace ImpulseMaker
                 (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
                 e.Y > zoom_options_area.Y + 2 && e.Y < zoom_options_area.Y + 20) ||
                 (e.X > zoom_options_area.X + 1 && e.X < zoom_options_area.X + 19 &&
-                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41)) && !is_in_chart_area && e.Button == MouseButtons.Left)
+                e.Y > zoom_options_area.Y + 23 && e.Y < zoom_options_area.Y + 41) ||
+                (e.X > series_selection_area.X && e.X < series_selection_area.X + series_selection_area.Width &&
+                e.Y > series_selection_area.Y && e.Y < series_selection_area.Y + series_selection_area.Height && is_able_to_choose))
+                && !is_in_chart_area && e.Button == MouseButtons.Left)
             {
                 if (this.Cursor == Cursors.NoMove2D)
                 {
@@ -367,8 +493,7 @@ namespace ImpulseMaker
                 }
 
                 this.Cursor = Cursors.Default;
-            }
-                
+            } 
         }
 
         void MyChart_MouseDown(object sender, MouseEventArgs e)
@@ -436,7 +561,57 @@ namespace ImpulseMaker
         {
             is_left = true;
             is_enter = false;
+            item_to_highlight = -1;
             Invalidate();
+        }
+
+        string find_longest_name()
+        {
+            SizeF size = new SizeF();
+            string str = "0";
+            foreach (var s in Series)
+            {
+                if (size.Width < TextRenderer.MeasureText(s.Name, this.Legends[0].Font).Width)
+                    str = s.Name;
+                size = TextRenderer.MeasureText(s.Name, this.Legends[0].Font);
+            }
+
+            return str;
+        }
+
+        void highlight_series(int index)
+        {
+            if (index >= 0)
+                for (int i = 0; i < this.Series.Count; ++i)
+                {
+                    if (i == index)
+                    {
+                        this.Series[i].Color = Color.FromArgb(255, this.Series[i].Color);
+                        this.Series[i].BorderWidth = 2;
+                    }
+                    else
+                    {
+                        this.Series[i].Color = Color.FromArgb(25, this.Series[i].Color);
+                    }
+                }
+            else
+                for (int i = 0; i < this.Series.Count; ++i)
+                {
+                    this.Series[i].Color = Color.FromArgb(255, this.Series[i].Color);
+                    this.Series[i].BorderWidth = 1;
+                }
+
+            Invalidate(Rectangle.Ceiling(chart_area));
+        }
+
+        public void SetSelectedSeries(int index)
+        {
+            if (index >= this.Series.Count)
+                return;
+
+            is_selection_set_outside = true;
+            selected_series = index;
+            is_selection_set_outside = false;
         }
     }
 }
