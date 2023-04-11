@@ -43,7 +43,6 @@ namespace ImpulseMaker
         char csv_delimiter = ';';
         bool is_first_col_sr = true,
             is_csv_empty_on_init = false;
-        Random RandGen = new Random(11);
         NumericUpDown nud_Min = new NumericUpDown();
         NumericUpDown nud_Max = new NumericUpDown();
 
@@ -139,10 +138,10 @@ namespace ImpulseMaker
 
         private void SignalDuration_ValueChanged(object sender, EventArgs e)
         {
+            redraw_whole_chart();
+
             if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
                 return;
-
-            redraw_whole_chart();
 
             int si = ChannelsListBox.selected_item;
             ChannelsListBox.clear_selection();
@@ -175,8 +174,9 @@ namespace ImpulseMaker
 
                 if (WholeSignalChart.Series.IsUniqueName(ch.name))
                     WholeSignalChart.Series.Add(ch.name);
-                WholeSignalChart.Series.Last().Color =
-                    Color.FromArgb(RandGen.Next(40, 210), RandGen.Next(60, 245), RandGen.Next(50, 220));
+                int index = WholeSignalChart.FindSettingIndexByName(ch.name);
+                WholeSignalChart.Series.Last().Color = WholeSignalChart.settings[index].color;
+                WholeSignalChart.Series.Last().BorderWidth = (int)WholeSignalChart.settings[index].width;
 
                 switch (Convert.ToInt32(MyIni.Read("Type", ch.name)))
                 {
@@ -552,6 +552,7 @@ namespace ImpulseMaker
             OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+            //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
         private void redraw_ramp_wholegraph(string name = "")
@@ -574,13 +575,7 @@ namespace ImpulseMaker
                 }
                 catch
                 {
-                    if (WholeSignalChart.Series.IsUniqueName(ChannelsListBox.Items
-                        [ChannelsListBox.selected_item].ToString()))
-                        WholeSignalChart.Series.Add(ChannelsListBox.Items
-                        [ChannelsListBox.selected_item].ToString());
-                    //WholeSignalChart.Series.Last().Color =
-                    //    Color.FromArgb(RandGen.Next(40, 210), RandGen.Next(60, 245), RandGen.Next(50, 220));
-                    series = WholeSignalChart.Series.Last();
+                    return;
                 }
             }
             else series = WholeSignalChart.Series.FindByName(name);
@@ -635,30 +630,34 @@ namespace ImpulseMaker
                 }
             }
 
-            if (ZeroEndingImpulseCheckBox.Checked)
-            {
-                for (i = 0; i < chart_points; ++i)
-                    if (xarr[i] > (double)SignalDurationValue.Value)
-                    {
-                        xarr[i] = (double)SignalDurationValue.Value - 2 / (double)SamplingRateValue.Value;
-                        yarr[yarr.Length - 1] = 0;
-                        break;
-                    }
-                if (i >= chart_points)
+            for (i = 0; i < chart_points; ++i)
+                if ((decimal)xarr[i] > SignalDurationValue.Value)
                 {
-                    xarr[xarr.Length - 1] = (double)SignalDurationValue.Value - 2 / (double)SamplingRateValue.Value;
-                    yarr[yarr.Length - 1] = 0;
+                    xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = (double)RampPeakTrackBar.Value / 100 > segments % 1 ?
+                        yarr[i] = yarr[i] - (yarr[i] - yarr[i - 1]) * (Math.Abs(segments % 1 - (double)RampPeakTrackBar.Value / 100)) :
+                        yarr[i] = yarr[i - 1] + (yarr[i] - yarr[i - 1]) * (Math.Abs(segments % 1 - (double)RampPeakTrackBar.Value / 100));
+                    break;
                 }
-            }
-            else
+            for (; i < chart_points; ++i)
+                if ((decimal)xarr[i] > SignalDurationValue.Value)
+                {
+                    xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = yarr[i - 1];
+                }
+
+            if (ZeroEndingRampCheckBox.Checked)
             {
                 xarr[xarr.Length - 1] = (double)SignalDurationValue.Value;
-                yarr[yarr.Length - 1] = yarr[yarr.Length - 2];
+                yarr[yarr.Length - 1] = 0;
             }
 
             for (i = xarr.Length - 1; i > 3; --i)
                 if (xarr[i] == 0)
+                {
                     xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = yarr[i - 1];
+                }
 
             series.Points.DataBindXY(xarr, yarr);
 
@@ -668,6 +667,7 @@ namespace ImpulseMaker
             WholeSignalChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
             WholeSignalChart.ChartAreas[0].AxisX.Interval = (double)SignalDurationValue.Value / 10;
+            //WholeSignalChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
         private void SaveRampChannelButton_Click(object sender, EventArgs e)
@@ -682,10 +682,11 @@ namespace ImpulseMaker
             MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
             MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
-            double[] r = new double[0];
-            save_csv_channel(RampChannelName.Text, ref r);
             ch_name_to_save = RampChannelName.Text;
             write_ini_channel(RampChannelName.Text);
+            double[] r = new double[0];
+            save_csv_channel(RampChannelName.Text, ref r);
+            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(RampChannelName.Text).ToString(), RampChannelName.Text);
 
             bgw.RunWorkerAsync();
 
@@ -754,6 +755,7 @@ namespace ImpulseMaker
             OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+            //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
         private void redraw_impulse_wholegraph(string name = "")
@@ -776,13 +778,7 @@ namespace ImpulseMaker
                 }
                 catch
                 {
-                    if (WholeSignalChart.Series.IsUniqueName(ChannelsListBox.Items
-                        [ChannelsListBox.selected_item].ToString()))
-                        WholeSignalChart.Series.Add(ChannelsListBox.Items
-                        [ChannelsListBox.selected_item].ToString());
-                    //WholeSignalChart.Series.Last().Color =
-                    //    Color.FromArgb(RandGen.Next(40, 210), RandGen.Next(60, 245), RandGen.Next(50, 220));
-                    series = WholeSignalChart.Series.Last();
+                    return;
                 }
             }
             else series = WholeSignalChart.Series.FindByName(name);
@@ -863,30 +859,25 @@ namespace ImpulseMaker
                 }
             }
 
+            for (i = 0; i < chart_points; ++i)
+                if (xarr[i] > (double)SignalDurationValue.Value)
+                {
+                    xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = yarr[i - 1];
+                }
+
             if (ZeroEndingImpulseCheckBox.Checked)
             {
-                for(i = 0; i < chart_points; ++i)
-                    if (xarr[i] > (double)SignalDurationValue.Value)
-                    {
-                        xarr[i] = (double)SignalDurationValue.Value - 2 / (double)SamplingRateValue.Value;
-                        yarr[yarr.Length - 1] = 0;
-                        break;
-                    }
-                if (i >= chart_points)
-                {
-                    xarr[xarr.Length - 1] = (double)SignalDurationValue.Value - 2 / (double)SamplingRateValue.Value;
-                    yarr[yarr.Length - 1] = 0;
-                }
-            }
-            else
-            {
                 xarr[xarr.Length - 1] = (double)SignalDurationValue.Value;
-                yarr[yarr.Length - 1] = yarr[yarr.Length - 2];
+                yarr[yarr.Length - 1] = 0;
             }
 
             for (i = xarr.Length - 1; i > 6; --i)
                 if (xarr[i] == 0)
+                {
                     xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = yarr[i - 1];
+                }
 
             series.Points.DataBindXY(xarr, yarr);
 
@@ -896,6 +887,7 @@ namespace ImpulseMaker
             WholeSignalChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
             WholeSignalChart.ChartAreas[0].AxisX.Interval = (double)SignalDurationValue.Value / 10;
+            //WholeSignalChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
         private void ImpulsePeriodValue_ValueChanged(object sender, EventArgs e)
@@ -928,10 +920,11 @@ namespace ImpulseMaker
             MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
             MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
 
-            double[] r = new double[0];
-            save_csv_channel(ImpulseChannelName.Text, ref r);
             ch_name_to_save = ImpulseChannelName.Text;
             write_ini_channel(ImpulseChannelName.Text);
+            double[] r = new double[0];
+            save_csv_channel(ImpulseChannelName.Text, ref r);
+            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ImpulseChannelName.Text).ToString(), ImpulseChannelName.Text);
 
             bgw.RunWorkerAsync();
 
@@ -1029,6 +1022,34 @@ namespace ImpulseMaker
         #endregion
 
         #region ChannelsList
+
+        private void ChannelsListBox_DeleteItem(object sender, EventArgs e)
+        {
+            switch (SignalTypeTabControl.SelectedIndex)
+            {
+                case 0:
+                    DeleteRampChannelButton_Click(sender, e);
+                    break;
+                case 1:
+                    DeleteImpulseChannelButton_Click(sender, e);
+                    break;
+                case 2:
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private void ChannelsListBox_RenameItem(string old_name, string new_name)
+        {
+            Channels[ChannelsListBox.selected_item].name = new_name;
+            WholeSignalChart.Series[old_name].Name = new_name;
+            WholeSignalChart.settings[WholeSignalChart.FindSettingIndexByName(old_name)].name = new_name;
+
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.DeleteSection(old_name);
+            write_ini_channel(new_name); 
+        }
 
         private void ChannelsListBox_fill()
         {

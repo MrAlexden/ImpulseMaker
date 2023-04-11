@@ -10,12 +10,16 @@ using System.Windows.Forms.DataVisualization.Charting;
 using System.Numerics;
 using System.ComponentModel;
 using System.Reflection;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.TextBox;
+using System.Xml.Linq;
 
 namespace ImpulseMaker
 {
     internal class MyChart : Chart
     {
         public event EventHandler SelectedSeriesChanged;
+        public event CustomEventHandler ColorChanged;
+        public delegate void CustomEventHandler(object sender, CustomEventArgs eventArgs);
 
         int highlightbutton = -1,
             item_to_highlight = -1,
@@ -42,8 +46,27 @@ namespace ImpulseMaker
             toshift_x,
             toshift_y;
         List<chart_coord> zoom_history = new List<chart_coord>();
+        public series_setting[] settings = new series_setting[0];
         chart_coord default_chart_coord;
         SizeF text_size = new SizeF();
+        ContextMenuStrip ChartSeriesContextMenuStrip = new ContextMenuStrip();
+
+        public class CustomEventArgs : EventArgs
+        {
+            public CustomEventArgs(int index_in)
+            {
+                index = index_in;
+            }
+
+            public int index;
+        }
+
+        public struct series_setting
+        {
+            public string name;
+            public Color color;
+            public uint width;
+        }
 
         struct chart_coord
         {
@@ -103,6 +126,14 @@ namespace ImpulseMaker
             //avoid flickering
             SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             SetStyle(ControlStyles.OptimizedDoubleBuffer, true);
+
+            ToolStripMenuItem Color = new ToolStripMenuItem("Цвет");
+            ToolStripMenuItem Width = new ToolStripMenuItem("Толщина");
+
+            ChartSeriesContextMenuStrip.Items.AddRange(new[] { Color, Width });
+
+            Color.Click += new EventHandler(MyChart_SeriesColorChoose);
+            Width.Click += new EventHandler(MyChart_SeriesWidthChoose);
 
             this.PostPaint += new System.EventHandler<System.Windows.Forms.DataVisualization.Charting.ChartPaintEventArgs>(MyChart_PostPaint);
             this.MouseMove += new MouseEventHandler(MyChart_MouseMove);
@@ -180,8 +211,12 @@ namespace ImpulseMaker
 
             /* Подсвечиваем выбранную серию в легенде */
             if (selected_series >= 0 && is_able_to_choose)
-                e.ChartGraphics.Graphics.FillRectangle(new SolidBrush(Color.FromArgb(25, Color.Red)), new RectangleF(series_selection_area.X,
+            {
+                Rectangle choosen_series = Rectangle.Round(new RectangleF(series_selection_area.X,
                     series_selection_area.Y + selected_series * text_size.Height, series_selection_area.Width, text_size.Height));
+                GraphicsPath choosen_path = RoundedRectangle.Create(choosen_series, 5);
+                e.ChartGraphics.Graphics.FillPath(new SolidBrush(Color.FromArgb(25, Color.Red)), choosen_path);
+            }
 
             /* Когда выбрана опция зума - подрисовываем дополнительные кнопки, относящиеся к этой опции */
             if (this.Cursor == Cursors.NoMove2D)
@@ -268,14 +303,20 @@ namespace ImpulseMaker
                 e.Y > series_selection_area.Y && e.Y < series_selection_area.Y + series_selection_area.Height && is_able_to_choose)
             {
                 item_to_highlight = (int)((float)(e.Y - series_selection_area.Y) / text_size.Height);
-                Invalidate(Rectangle.Ceiling(series_selection_area));
+                Invalidate(new Rectangle((int)series_selection_area.X - 2,
+                        (int)series_selection_area.Y - 2,
+                        (int)series_selection_area.X + (int)series_selection_area.Width + 2,
+                        (int)series_selection_area.Y + (int)series_selection_area.Height + 2));
             }
             else
             {
                 if (item_to_highlight != -1)
                 {
                     item_to_highlight = -1;
-                    Invalidate(Rectangle.Ceiling(series_selection_area));
+                    Invalidate(new Rectangle((int)series_selection_area.X - 2,
+                        (int)series_selection_area.Y - 2,
+                        (int)series_selection_area.X + (int)series_selection_area.Width + 2,
+                        (int)series_selection_area.Y + (int)series_selection_area.Height + 2));
                 }
             }
 
@@ -364,6 +405,7 @@ namespace ImpulseMaker
                 toshift_y = e.Y;
 
                 this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+                //this.ChartAreas[0].AxisY.Interval = 0.1;
 
                 recalc_chart_area = true;
             }
@@ -374,6 +416,15 @@ namespace ImpulseMaker
             /* Какую серию выбирает пользователь при нажатии на легенду */
             if (item_to_highlight >= 0 && is_able_to_choose)
                 selected_series = item_to_highlight;
+
+            /* Был ли клик правой кнопкой мыши по подсвечиваемой серии в легенде чтобы вызвать контекствное меню */
+            if (e.X > series_selection_area.X && e.X < series_selection_area.X + series_selection_area.Width &&
+                e.Y > series_selection_area.Y + item_to_highlight * text_size.Height && 
+                e.Y < series_selection_area.Y + item_to_highlight * text_size.Height + text_size.Height &&
+                e.Button == MouseButtons.Right)
+            {
+                ChartSeriesContextMenuStrip.Show(this, e.X, e.Y);
+            }
 
             /* Было ли нажатие вне легенды, вне области опций и вне области графика чтобы снять выделение */
             if (!((e.X > series_selection_area.X && e.X < series_selection_area.X + series_selection_area.Width &&
@@ -423,6 +474,7 @@ namespace ImpulseMaker
                     this.ChartAreas[0].AxisY.Maximum = zoom_history.Last().y_max;
 
                     this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+                    //this.ChartAreas[0].AxisY.Interval = 0.1;
 
                     zoom_history.RemoveAt(zoom_history.Count - 1);
 
@@ -448,6 +500,7 @@ namespace ImpulseMaker
                     this.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
                     this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+                    //this.ChartAreas[0].AxisY.Interval = 0.1;
 
                     zoom_history.Clear();
 
@@ -486,6 +539,7 @@ namespace ImpulseMaker
                     this.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
                     this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+                    //this.ChartAreas[0].AxisY.Interval = 0.1;
 
                     zoom_history.Clear();
 
@@ -538,6 +592,7 @@ namespace ImpulseMaker
                 this.ChartAreas[0].AxisY.Maximum = v4;
 
                 this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
+                //this.ChartAreas[0].AxisY.Interval = 0.1;
 
                 recalc_chart_area = true;
             }
@@ -585,21 +640,13 @@ namespace ImpulseMaker
                 for (int i = 0; i < this.Series.Count; ++i)
                 {
                     if (i == index)
-                    {
                         this.Series[i].Color = Color.FromArgb(255, this.Series[i].Color);
-                        this.Series[i].BorderWidth = 2;
-                    }
                     else
-                    {
                         this.Series[i].Color = Color.FromArgb(25, this.Series[i].Color);
-                    }
                 }
             else
                 for (int i = 0; i < this.Series.Count; ++i)
-                {
                     this.Series[i].Color = Color.FromArgb(255, this.Series[i].Color);
-                    this.Series[i].BorderWidth = 1;
-                }
 
             Invalidate(Rectangle.Ceiling(chart_area));
         }
@@ -612,6 +659,114 @@ namespace ImpulseMaker
             is_selection_set_outside = true;
             selected_series = index;
             is_selection_set_outside = false;
+        }
+
+        void MyChart_SeriesColorChoose(object sender, EventArgs e)
+        {
+            ColorDialog colorDialog = new ColorDialog();
+            colorDialog.ShowDialog(this);
+            this.Series[selected_series].Color = colorDialog.Color;
+            this.settings[FindSettingIndexByName(Series[selected_series].Name)].color = colorDialog.Color;
+            if (ColorChanged != null)
+                ColorChanged(this, new CustomEventArgs(selected_series));
+        }
+
+        void MyChart_SeriesWidthChoose(object sender, EventArgs e)
+        {
+            ValueSelectionDialog d = new ValueSelectionDialog((int)series_selection_area.X - 100,
+                (int)series_selection_area.Y + (int)(selected_series * text_size.Height),
+                this);
+        }
+
+        #region series_settings
+
+        public int FindSettingIndexByName(string name)
+        {
+            int index = 0;
+            foreach (var set in settings)
+            {
+                if (set.name == name)
+                    return index;
+                index++;
+            }
+
+            AddSettings(name, Color.FromArgb(new Random(index * index).Next(40, 210),
+                new Random(index * index * index * index).Next(60, 245),
+                new Random(index * index * index).Next(50, 220)));
+
+            return index;
+        }
+
+        public void AddSettings(string name, Color color, uint width = 3)
+        {
+            for (int i = 0; i < settings.Length; ++i)
+                if (settings[i].name == name)
+                {
+                    settings[i].color = color;
+                    settings[i].width = width;
+                    return;
+                }
+
+            series_setting[] temp = settings;
+            settings = new series_setting[temp.Length + 1];
+            for (int i = 0; i < temp.Count(); ++i)
+                    settings[i] = temp[i];
+            settings[settings.Length - 1] = new series_setting() { name = name, color = color, width = width };
+        }
+
+        public void DeleteSettings(string name)
+        {
+            series_setting[] temp = settings;
+            settings = new series_setting[temp.Length - 1];
+            for (int i = 0; i < temp.Count(); ++i)
+                if (temp[i].name != name)
+                    settings[i] = temp[i];
+        }
+
+        #endregion
+
+        class ValueSelectionDialog : Control
+        {
+            MyChart _parent;
+            NumericUpDown input_box = new NumericUpDown() { Left = 0, Top = 0, Width = 100 };
+            Button ok_button = new Button() { Text = "Ok", Left = 0, Top = 20, Width = 50 };
+            Button cancel_button = new Button() { Text = "Cancel", Left = 50, Top = 20, Width = 50 };
+
+            public ValueSelectionDialog(int X, int Y, MyChart parent)
+            {
+                parent.Controls.Add(this);
+                _parent = parent;
+
+                this.Width = 100;
+                this.Height = 42;
+                this.Location = new Point(X, Y);
+
+                this.Controls.AddRange(new Control[] { input_box, ok_button, cancel_button });
+
+                ok_button.Click += new EventHandler(ValueSelectionDialog_Ok);
+                cancel_button.Click += new EventHandler(ValueSelectionDialog_Cancel);
+                parent.SelectedSeriesChanged += new EventHandler(ValueSelectionDialog_Close);
+
+                input_box.DecimalPlaces = 0;
+                input_box.Value = parent.Series[parent.selected_series].BorderWidth;
+            }
+
+            void ValueSelectionDialog_Ok(object sender, EventArgs e)
+            {
+                _parent.Series[_parent.selected_series].BorderWidth = (int)input_box.Value;
+                _parent.settings[_parent.FindSettingIndexByName(_parent.Series[_parent.selected_series].Name)].width = (uint)input_box.Value;
+                this.Dispose();
+            }
+
+            void ValueSelectionDialog_Cancel(object sender, EventArgs e)
+            {
+                this.Dispose();
+            }
+
+            void ValueSelectionDialog_Close(object sender, EventArgs e)
+            {
+                this.Dispose();
+            }
         }
     }
 }

@@ -45,7 +45,7 @@ namespace ImpulseMaker
 
             //Top Edge
             p.AddLine(xr, y, xwr, y);
-
+            
             //Top Right Corner
             if ((RectangleCorners.TopRight & corners) == RectangleCorners.TopRight)
             {
