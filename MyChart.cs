@@ -627,8 +627,10 @@ namespace ImpulseMaker
             foreach (var s in Series)
             {
                 if (size.Width < TextRenderer.MeasureText(s.Name, this.Legends[0].Font).Width)
+                {
                     str = s.Name;
-                size = TextRenderer.MeasureText(s.Name, this.Legends[0].Font);
+                    size = TextRenderer.MeasureText(s.Name, this.Legends[0].Font);
+                }
             }
 
             return str;
