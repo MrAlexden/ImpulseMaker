@@ -24,7 +24,21 @@ namespace ImpulseMaker
                 n *= 10;
                 n -= (int)n;
             }
-            return decimalPlaces;
+            return decimalPlaces > 10 ? 10 : decimalPlaces;
+        }
+
+        public static int GetDecimalPlaces(double n)
+        {
+            n = Math.Abs(n); //make sure it is positive.
+            n -= (int)n;     //remove the integer part of the number.
+            var decimalPlaces = 0;
+            while (n > 0)
+            {
+                decimalPlaces++;
+                n *= 10;
+                n -= (int)n;
+            }
+            return decimalPlaces > 10 ? 10 : decimalPlaces;
         }
     }
 
@@ -284,11 +298,11 @@ namespace ImpulseMaker
             if (movingMode == MovingMode.MovingMin)
                 SelectedMin = 
                     (float)Math.Round((double)(pointedValue < Min ? Min : pointedValue > selectedMax ? selectedMax : pointedValue),
-                    MathDecimals.GetDecimalPlaces((decimal)(Max / 100)));
+                    MathDecimals.GetDecimalPlaces((decimal)(Max / rezolution)));
             else if (movingMode == MovingMode.MovingMax)
                 SelectedMax = 
                     (float)Math.Round((double)(pointedValue > Max ? Max : pointedValue < selectedMin ? selectedMin : pointedValue),
-                    MathDecimals.GetDecimalPlaces((decimal)(Max / 100)));
+                    MathDecimals.GetDecimalPlaces((decimal)(Max / rezolution)));
         }
 
         /// <summary>
@@ -296,6 +310,7 @@ namespace ImpulseMaker
         /// </summary>
         enum MovingMode { MovingMin, MovingMax }
         MovingMode movingMode;
+        int rezolution = 10;
 
         #region Component Designer generated code
 

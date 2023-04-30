@@ -207,18 +207,28 @@ namespace ImpulseMaker
             e.Graphics.FillPath(Brushes.White, path);
 
             for (int i = 0; i < this.Items.Count; ++i)
-                e.Graphics.DrawString(Items[i], this.Font, Brushes.Black, new PointF(0, text_size.Height * i));
+            {
+                e.Graphics.DrawString(i.ToString(), this.Font, Brushes.Black, new PointF(0, text_size.Height * i));
+                e.Graphics.DrawString(Items[i], this.Font, Brushes.Black, new PointF(20, text_size.Height * i));
+            }
 
             if (item_to_highlight >= 0 &&
                 item_to_highlight < this.Items.Count)
             {
                 SizeF size = TextRenderer.MeasureText(this.Items[item_to_highlight].ToString(), this.Font);
 
+                int x_beg = this.Width - 16,
+                    y_beg = (int)(size.Height * item_to_highlight + size.Height / 2),
+                    x_end = (int)size.Width + 20,
+                    y_end = (int)(size.Height * item_to_highlight + size.Height / 2);
+
+                if (x_beg == x_end) x_end--;
+
                 LinearGradientBrush myVerticalGradient =
-                    new LinearGradientBrush(new Point(this.Width - 16, (int)(size.Height * item_to_highlight + size.Height / 2)),
-                    new Point((int)size.Width, (int)(size.Height * item_to_highlight + size.Height / 2)), Color.LightGray, this.BackColor);
+                    new LinearGradientBrush(new Point(x_beg, y_beg),
+                    new Point(x_end, y_end), Color.LightGray, this.BackColor);
                 e.Graphics.FillRectangle(myVerticalGradient,
-                    size.Width + 1, size.Height * item_to_highlight, this.Width - 16 - size.Width, size.Height);
+                    size.Width + 21, size.Height * item_to_highlight, this.Width - 16 - size.Width, size.Height);
 
                 e.Graphics.DrawRectangle(Pens.LightGray, 0, size.Height * item_to_highlight, this.Width, size.Height);
                 e.Graphics.FillRectangle(Brushes.LightGray, this.Width - 16, size.Height * item_to_highlight, 16, size.Height * 2);
