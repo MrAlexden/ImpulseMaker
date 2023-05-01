@@ -70,17 +70,17 @@ namespace ImpulseMaker
         /// Minimum value of the slider.
         /// </summary>
         [Description("Minimum value of the slider.")]
-        public float Min
+        public decimal Min
         {
             get { return min; }
             set { min = value; Invalidate(); }
         }
-        float min = 0;
+        decimal min = 0;
         /// <summary>
         /// Maximum value of the slider.
         /// </summary>
         [Description("Maximum value of the slider.")]
-        public float Max
+        public decimal Max
         {
             get { return max; }
             set
@@ -92,13 +92,13 @@ namespace ImpulseMaker
                 Invalidate();
             }
         }
-        float max = 100;
-        private float max_buff = 100;
+        decimal max = 100;
+        private decimal max_buff = 100;
         /// <summary>
         /// Minimum value of the selection range.
         /// </summary>
         [Description("Minimum value of the selection range.")]
-        public float SelectedMin
+        public decimal SelectedMin
         {
             get { return selectedMin; }
             set
@@ -109,12 +109,12 @@ namespace ImpulseMaker
                 Invalidate();
             }
         }
-        float selectedMin = 0;
+        decimal selectedMin = 0;
         /// <summary>
         /// Maximum value of the selection range.
         /// </summary>
         [Description("Maximum value of the selection range.")]
-        public float SelectedMax
+        public decimal SelectedMax
         {
             get { return selectedMax; }
             set
@@ -125,7 +125,7 @@ namespace ImpulseMaker
                 Invalidate();
             }
         }
-        float selectedMax = 100;
+        decimal selectedMax = 100;
         /// <summary>
         /// Fired when SelectedMin or SelectedMax changes.
         /// </summary>
@@ -160,8 +160,8 @@ namespace ImpulseMaker
         public struct string_rect
         {
             public SizeF rect;
-            public float X;
-            public float Y;
+            public decimal X;
+            public decimal Y;
         }
         public string_rect sMin, sMax;
 
@@ -188,15 +188,15 @@ namespace ImpulseMaker
             //fill min string rectangle data
             var font = new Font("Arial", 12);
             sMin.rect = e.Graphics.MeasureString(selectedMin.ToString(), font);
-            sMin.X = Width * selectedMin / (Max - Min) < Width - sMin.rect.Width ?
+            sMin.X = Width * selectedMin / (Max - Min) < Width - (decimal)sMin.rect.Width ?
                 Width * selectedMin / (Max - Min) :
-                Width * selectedMin / (Max - Min) - sMin.rect.Width;
-            sMin.Y = Height - sMin.rect.Height;
+                Width * selectedMin / (Max - Min) - (decimal)sMin.rect.Width;
+            sMin.Y = Height - (decimal)sMin.rect.Height;
             //fill max string rectangle data
             sMax.rect = e.Graphics.MeasureString(selectedMax.ToString(), font);
-            sMax.X = Width * selectedMax / (Max - Min) < sMax.rect.Width ?
+            sMax.X = Width * selectedMax / (Max - Min) < (decimal)sMax.rect.Width ?
                 Width * selectedMax / (Max - Min) :
-                Width * selectedMax / (Max - Min) - sMax.rect.Width;
+                Width * selectedMax / (Max - Min) - (decimal)sMax.rect.Width;
             sMax.Y = 0;
 
             //paint selection range in blue
@@ -211,37 +211,37 @@ namespace ImpulseMaker
             e.Graphics.DrawRectangle(Pens.Black, 0, sMax.rect.Height, Width - 1, Height - sMin.rect.Height - sMax.rect.Height);
 
             e.Graphics.DrawLine(Pens.Blue,
-                Width * selectedMin / (Max - Min), sMax.rect.Height,
-                Width * selectedMin / (Max - Min), Height);
+                (float)(Width * selectedMin / (Max - Min)), sMax.rect.Height,
+                (float)(Width * selectedMin / (Max - Min)), Height);
             e.Graphics.DrawLine(Pens.Red,
-                Width * selectedMax / (Max - Min) - 1, 0,
-                Width * selectedMax / (Max - Min) - 1, Height - sMin.rect.Height);
+                (float)(Width * selectedMax / (Max - Min) - 1), 0,
+                (float)(Width * selectedMax / (Max - Min) - 1), Height - sMin.rect.Height);
 
             //draw strings with min and max values
-            e.Graphics.FillRectangle(Brushes.Blue, sMin.X, sMin.Y, sMin.rect.Width, sMin.rect.Height);
+            e.Graphics.FillRectangle(Brushes.Blue, (float)sMin.X, (float)sMin.Y, sMin.rect.Width, sMin.rect.Height);
             e.Graphics.DrawString(selectedMin.ToString(),
                 font,
                 Brushes.Black,
-                sMin.X,
-                sMin.Y);
-            e.Graphics.FillRectangle(Brushes.Red, sMax.X, sMax.Y, sMax.rect.Width, sMax.rect.Height);
+                (float)sMin.X,
+                (float)sMin.Y);
+            e.Graphics.FillRectangle(Brushes.Red, (float)sMax.X, (float)sMax.Y, sMax.rect.Width, sMax.rect.Height);
             e.Graphics.DrawString(selectedMax.ToString(),
                 font, 
                 Brushes.Black,
-                sMax.X,
-                sMax.Y);
+                (float)sMax.X,
+                (float)sMax.Y);
         }
 
         void SelectionRangeSlider_MouseClick(object sender, MouseEventArgs e)
         {
-            if ((e.X > sMin.X) && (e.X < sMin.X + sMin.rect.Width) &&
-                (e.Y > sMin.Y) && (e.Y < sMin.Y + sMin.rect.Height))
+            if ((e.X > sMin.X) && (e.X < sMin.X + (decimal)sMin.rect.Width) &&
+                (e.Y > sMin.Y) && (e.Y < sMin.Y + (decimal)sMin.rect.Height))
             {
                 if (MinClicked != null)
                     MinClicked(this, null);
             }
-            else if ((e.X > sMax.X) && (e.X < sMax.X + sMax.rect.Width) &&
-                    (e.Y > sMax.Y) && (e.Y < sMax.Y + sMax.rect.Height))
+            else if ((e.X > sMax.X) && (e.X < sMax.X + (decimal)sMax.rect.Width) &&
+                    (e.Y > sMax.Y) && (e.Y < sMax.Y + (decimal)sMax.rect.Height))
             {
                 if (MaxClicked != null)
                     MaxClicked(this, null);
@@ -251,10 +251,10 @@ namespace ImpulseMaker
         void SelectionRangeSlider_MouseDown(object sender, MouseEventArgs e)
         {
             //check where the user clicked so we can decide which thumb to move
-            float pointedValue = Min + e.X * (Max - Min) / Width;
+            decimal pointedValue = Min + e.X * (Max - Min) / Width;
 
-            float distMin = Math.Abs(pointedValue - selectedMin);
-            float distMax = Math.Abs(pointedValue - selectedMax);
+            decimal distMin = Math.Abs(pointedValue - selectedMin);
+            decimal distMax = Math.Abs(pointedValue - selectedMax);
 
             if (distMin < distMax)
                 movingMode = MovingMode.MovingMin;
@@ -270,18 +270,18 @@ namespace ImpulseMaker
         void SelectionRangeSlider_MouseMove(object sender, MouseEventArgs e)
         {
             //detecting whether cursor on MinMaxString boxes or not
-            if (!((e.X > sMin.X - sMin.rect.Height) &&
-                (e.X < sMin.X + sMin.rect.Width + sMin.rect.Height) &&
-                (e.Y > sMin.Y - sMin.rect.Height) &&
-                (e.Y < sMin.Y + sMin.rect.Height + sMin.rect.Height)))
+            if (!((e.X > sMin.X - (decimal)sMin.rect.Height) &&
+                (e.X < sMin.X + (decimal)sMin.rect.Width + (decimal)sMin.rect.Height) &&
+                (e.Y > sMin.Y - (decimal)sMin.rect.Height) &&
+                (e.Y < sMin.Y + (decimal)sMin.rect.Height + (decimal)sMin.rect.Height)))
             {
                 if (CursorLeftMin != null)
                     CursorLeftMin(this, null);
             }
-            if (!((e.X > sMax.X - sMin.rect.Height) &&
-                (e.X < sMax.X + sMax.rect.Width + sMin.rect.Height) &&
-                (e.Y > sMax.Y - sMin.rect.Height) &&
-                (e.Y < sMax.Y + sMax.rect.Height + sMin.rect.Height)))
+            if (!((e.X > sMax.X - (decimal)sMin.rect.Height) &&
+                (e.X < sMax.X + (decimal)sMax.rect.Width + (decimal)sMin.rect.Height) &&
+                (e.Y > sMax.Y - (decimal)sMin.rect.Height) &&
+                (e.Y < sMax.Y + (decimal)sMax.rect.Height + (decimal)sMin.rect.Height)))
             {
                 if (CursorLeftMax != null)
                     CursorLeftMax(this, null);
@@ -293,16 +293,16 @@ namespace ImpulseMaker
             if (!(e.Y > sMax.rect.Height && e.Y < Height - sMin.rect.Height))
                 return;
 
-            float pointedValue = Min + e.X * (Max - Min) / Width;
+            decimal pointedValue = Min + e.X * (Max - Min) / Width;
 
             if (movingMode == MovingMode.MovingMin)
                 SelectedMin = 
-                    (float)Math.Round((double)(pointedValue < Min ? Min : pointedValue > selectedMax ? selectedMax : pointedValue),
-                    MathDecimals.GetDecimalPlaces((decimal)(Max / rezolution)));
+                    (decimal)Math.Round((decimal)(pointedValue < Min ? Min : pointedValue > selectedMax ? selectedMax : pointedValue),
+                    MathDecimals.GetDecimalPlaces(Max / rezolution));
             else if (movingMode == MovingMode.MovingMax)
                 SelectedMax = 
-                    (float)Math.Round((double)(pointedValue > Max ? Max : pointedValue < selectedMin ? selectedMin : pointedValue),
-                    MathDecimals.GetDecimalPlaces((decimal)(Max / rezolution)));
+                    (decimal)Math.Round((decimal)(pointedValue > Max ? Max : pointedValue < selectedMin ? selectedMin : pointedValue),
+                    MathDecimals.GetDecimalPlaces(Max / rezolution));
         }
 
         /// <summary>

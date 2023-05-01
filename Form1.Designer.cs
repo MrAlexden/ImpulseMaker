@@ -530,11 +530,11 @@ namespace ImpulseMaker
             // 
             this.SeveralSlidersImpulseTrackBar.Location = new System.Drawing.Point(1, 185);
             this.SeveralSlidersImpulseTrackBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.SeveralSlidersImpulseTrackBar.Max = 0.1F;
-            this.SeveralSlidersImpulseTrackBar.Min = 0F;
+            this.SeveralSlidersImpulseTrackBar.Max = 0.1m;
+            this.SeveralSlidersImpulseTrackBar.Min = 0m;
             this.SeveralSlidersImpulseTrackBar.Name = "SeveralSlidersImpulseTrackBar";
-            this.SeveralSlidersImpulseTrackBar.SelectedMax = 0.015F;
-            this.SeveralSlidersImpulseTrackBar.SelectedMin = 0.008F;
+            this.SeveralSlidersImpulseTrackBar.SelectedMax = 0.015m;
+            this.SeveralSlidersImpulseTrackBar.SelectedMin = 0.008m;
             this.SeveralSlidersImpulseTrackBar.Size = new System.Drawing.Size(249, 58);
             this.SeveralSlidersImpulseTrackBar.TabIndex = 1;
             this.SeveralSlidersImpulseTrackBar.SelectionChanged += new System.EventHandler(this.impulse_graph);
