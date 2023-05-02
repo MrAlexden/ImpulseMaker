@@ -808,6 +808,7 @@ namespace ImpulseMaker
             0,
             65536});
             this.SignalDurationValue.ValueChanged += new System.EventHandler(this.SignalDuration_ValueChanged);
+            this.SamplingRateValue.ValueChangedBeforeLeave += new EventHandler(this.SaveAllChannelsButton_Click);
             // 
             // SamplingRateValue
             // 
@@ -836,6 +837,7 @@ namespace ImpulseMaker
             0,
             0,
             0});
+            this.SamplingRateValue.ValueChangedBeforeLeave += new EventHandler(this.SaveAllChannelsButton_Click);
             // 
             // WholeSignalChart
             // 

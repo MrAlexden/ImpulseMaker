@@ -43,12 +43,9 @@ namespace ImpulseMaker
         char csv_delimiter = ';';
         bool is_first_col_sr = true,
             is_csv_empty_on_init = false,
-            is_drawing_busy = false,
-            is_from_listbox = false;
-        int TAB_PAGE_I_WANT = -1; //ВСЕМ КОСТЫЛЯМ КОСТЫЛЬ. Каждый раз при смене tabpage он заходит на нулевой.
-                                  //Эта хрень нужна чтобы он так не делал. ИБО Я НЕ ЗНАЮ КАК ЭТО ФИКСИТЬ
-        NumericUpDown nud_Min = new NumericUpDown() { Width = 70 };
-        NumericUpDown nud_Max = new NumericUpDown() { Width = 70 };
+            is_drawing_busy = false;
+        NumericUpDown nud_Min = new NumericUpDown();
+        NumericUpDown nud_Max = new NumericUpDown();
 
         private void Form1_Load(object sender, EventArgs e)
         {
@@ -61,8 +58,6 @@ namespace ImpulseMaker
             {
                 ini_path = (string)key.GetValue("INI", ini_file_name);
                 csv_path = (string)key.GetValue("CSV", csv_file_name);
-                ini_file_name = ini_path.Substring(ini_path.LastIndexOf('\\') + 1, ini_path.Length - ini_path.LastIndexOf('\\') - 1);
-                csv_file_name = csv_path.Substring(csv_path.LastIndexOf('\\') + 1, csv_path.Length - csv_path.LastIndexOf('\\') - 1);
 
                 if (ini_path.First() == '\\')
                     ini_path = ini_path.Substring(1, ini_path.Length - 1);
@@ -118,12 +113,11 @@ namespace ImpulseMaker
                 redraw_whole_chart();
 
                 ChannelsListBox.selected_item = 0;
-                read_ini_channel(ChannelsListBox.Items[0]);
             }
 
             RampPeakTrackerLabel.Text = ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value).ToString();
 
-            SeveralSlidersImpulseTrackBar.Max = ImpulsePeriodValue.Value;
+            SeveralSlidersImpulseTrackBar.Max = (float)ImpulsePeriodValue.Value;
         }
 
         public void Swap<T>(ref List<T> list, int indexA, int indexB)
@@ -178,66 +172,61 @@ namespace ImpulseMaker
         {
             IniFile MyIni = new IniFile(ini_path);
 
-            if (WholeSignalChart.Series.Count() > 0)
-                WholeSignalChart.Series.Clear();
-
-            for (int i = 0; i < Channels.Count; ++i)
+            WholeSignalChart.Series.Clear();
+            foreach (var ch in Channels)
             {
-                if (Channels[i] == null || !MyIni.KeyExists("Type", Channels[i].name))
+                if (ch == null || !MyIni.KeyExists("Type", ch.name))
                     continue;
 
-                if (WholeSignalChart.Series.IsUniqueName(Channels[i].name))
+                if (WholeSignalChart.Series.IsUniqueName(ch.name))
                 {
                     WholeSignalChart.recalc_chart_area = true;
-                    WholeSignalChart.Series.Add(Channels[i].name);
+                    WholeSignalChart.Series.Add(ch.name);
                 }
-                int index = WholeSignalChart.FindSettingIndexByName(Channels[i].name);
+                int index = WholeSignalChart.FindSettingIndexByName(ch.name);
                 WholeSignalChart.Series.Last().Color = WholeSignalChart.settings[index].color;
                 WholeSignalChart.Series.Last().BorderWidth = (int)WholeSignalChart.settings[index].width;
 
-                switch (Convert.ToInt32(MyIni.Read("Type", Channels[i].name)))
+                switch (Convert.ToInt32(MyIni.Read("Type", ch.name)))
                 {
                     case 0:
 
-                        RampBeginValue.Value = Convert.ToDecimal(MyIni.Read("BeginValue", Channels[i].name));
-                        RampPeakValue.Value = Convert.ToDecimal(MyIni.Read("PeakValue", Channels[i].name));
-                        RampPeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", Channels[i].name));
-                        RampPeakTrackerLabel.Text = MyIni.Read("PeakPos", Channels[i].name);
+                        RampBeginValue.Value = Convert.ToDecimal(MyIni.Read("BeginValue", ch.name));
+                        RampPeakValue.Value = Convert.ToDecimal(MyIni.Read("PeakValue", ch.name));
+                        RampPeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", ch.name));
+                        RampPeakTrackerLabel.Text = MyIni.Read("PeakPos", ch.name);
                         RampPeakTrackBar.Value = (int)(Convert.ToDecimal(RampPeakTrackerLabel.Text) /
                             Convert.ToDecimal(RampPeriodValue.Value) * 100);
-                        ZeroEndingRampCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1;
+                        ZeroEndingRampCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1;
 
-                        redraw_ramp_wholegraph(Channels[i].name);
+                        redraw_ramp_wholegraph(ch.name);
                         break;
                     case 1:
 
-                        ImpulseBaseValue.Value = Convert.ToDecimal(MyIni.Read("BaseValue", Channels[i].name));
-                        ImpulseLevelValue.Value = Convert.ToDecimal(MyIni.Read("LevelValue", Channels[i].name));
-                        ImpulsePeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", Channels[i].name));
-                        SeveralSlidersImpulseTrackBar.Min = Convert.ToDecimal(MyIni.Read("Min", Channels[i].name));
-                        SeveralSlidersImpulseTrackBar.Max = Convert.ToDecimal(MyIni.Read("Max", Channels[i].name));
-                        SeveralSlidersImpulseTrackBar.SelectedMin = Convert.ToDecimal(MyIni.Read("LeftPos", Channels[i].name));
-                        SeveralSlidersImpulseTrackBar.SelectedMax = Convert.ToDecimal(MyIni.Read("RightPos", Channels[i].name));
-                        ZeroEndingImpulseCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1;
+                        ImpulseBaseValue.Value = Convert.ToDecimal(MyIni.Read("BaseValue", ch.name));
+                        ImpulseLevelValue.Value = Convert.ToDecimal(MyIni.Read("LevelValue", ch.name));
+                        ImpulsePeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", ch.name));
+                        SeveralSlidersImpulseTrackBar.Min = (float)Convert.ToDecimal(MyIni.Read("Min", ch.name));
+                        SeveralSlidersImpulseTrackBar.Max = (float)Convert.ToDecimal(MyIni.Read("Max", ch.name));
+                        SeveralSlidersImpulseTrackBar.SelectedMin = (float)Convert.ToDouble(MyIni.Read("LeftPos", ch.name));
+                        SeveralSlidersImpulseTrackBar.SelectedMax = (float)Convert.ToDouble(MyIni.Read("RightPos", ch.name));
+                        ZeroEndingImpulseCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1;
 
-                        redraw_impulse_wholegraph(Channels[i].name);
+                        redraw_impulse_wholegraph(ch.name);
                         break;
                     case 2:
                         break;
                     case 3:
 
-                        CustomPeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", Channels[i].name));
-                        ZeroEndingCustomCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1;
+                        CustomPeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", ch.name));
+                        ZeroEndingCustomCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1;
 
-                        DataPoint[] dataset = new DataPoint[Convert.ToInt32(MyIni.Read("Length", Channels[i].name))];
+                        DataPoint[] dataset = new DataPoint[Convert.ToInt32(MyIni.Read("Length", ch.name))];
 
-                        for (int j = 0; j < dataset.Count(); ++j)
-                            dataset[j] = new DataPoint(Convert.ToDouble(MyIni.Read("XP" + j, Channels[i].name)),
-                                Convert.ToDouble(MyIni.Read("YP" + j, Channels[i].name)));
+                        for (int i = 0; i < dataset.Count(); ++i)
+                            dataset[i] = new DataPoint(Convert.ToDouble(MyIni.Read("XP" + i, ch.name)), Convert.ToDouble(MyIni.Read("YP" + i, ch.name)));
 
-                        pointCoordinatesListBox.Set_DataSet(dataset);
-
-                        redraw_custom_wholegraph(Channels[i].name);
+                        redraw_custom_wholegraph(ch.name);
                         break;
                     default:
                         return;
@@ -245,7 +234,7 @@ namespace ImpulseMaker
             }
         }
 
-        private void bgw_SaveOneChannel(object sender, DoWorkEventArgs e)
+        private void bgw_SaveChannel(object sender, DoWorkEventArgs e)
         {
             IniFile MyIni = new IniFile(ini_path);
 
@@ -297,11 +286,9 @@ namespace ImpulseMaker
                                             Convert.ToDouble(MyIni.Read("Period", ch_name_to_save)),
                                             Convert.ToInt32(MyIni.Read("IsZeroEnding", ch_name_to_save)) == 1 ? 1 : 0};
 
-                        DataPoint[] dataset = new DataPoint[Convert.ToInt32(MyIni.Read("Length", ch_name_to_save))];
-
-                        for (int j = 0; j < dataset.Count(); ++j)
-                            dataset[j] = new DataPoint(Convert.ToDouble(MyIni.Read("XP" + j, ch_name_to_save)),
-                                Convert.ToDouble(MyIni.Read("YP" + j, ch_name_to_save)));
+                        DataPoint[] dataset = pointCoordinatesListBox.Get_DataSet();
+                        if (dataset == null)
+                            return;
 
                         if (calculate_custom_channel(ref data, ref controls, ref dataset) == 0)
                             save_csv_channel(ch_name_to_save, ref data);
@@ -331,63 +318,31 @@ namespace ImpulseMaker
 
         private void PointCoordinatesListBox_PointChanged(DataPoint point, int index)
         {
-            //is_drawing_busy = false;
             custom_graph(null, null);
         }
 
         private void PointCoordinatesListBox_PointAdded(DataPoint point, int index)
         {
-            is_drawing_busy = false;
             custom_graph(null, null);
+            //OneSegmentChart.Series[0].Points.DataBindXY(pointCoordinatesListBox.Get_DataSet());
         }
 
         private void PointCoordinatesListBox_PointDeleted(DataPoint point, int index)
         {
-            is_drawing_busy = false;
             custom_graph(null, null);
+            //OneSegmentChart.Series[0].Points.DataBindXY(pointCoordinatesListBox.Get_DataSet());
         }
 
         private void OneSegmentChart_PointChanged(DataPoint point, int index)
         {
-            TAB_PAGE_I_WANT = 3;
             SignalTypeTabControl.SelectedIndex = 3;
-            TAB_PAGE_I_WANT = -1;
-
             pointCoordinatesListBox.Set_ChangedPoint(point, index);
         }
 
         private void OneSegmentChart_PointAdded(DataPoint point, int index)
         {
-            if (SignalTypeTabControl.SelectedIndex != 3)
-            {
-                TAB_PAGE_I_WANT = 3;
-                SignalTypeTabControl.SelectedIndex = 3;
-                TAB_PAGE_I_WANT = -1;
-            }
-            else
-            {
-                pointCoordinatesListBox.is_from_outside = true;
-                pointCoordinatesListBox.Set_AddedPoint(point, index);
-            }
-
-            redraw_custom_wholegraph();
-        }
-
-        private void OneSegmentChart_PointDeleted(DataPoint point, int index)
-        {
-            if (SignalTypeTabControl.SelectedIndex != 3)
-            {
-                TAB_PAGE_I_WANT = 3;
-                SignalTypeTabControl.SelectedIndex = 3;
-                TAB_PAGE_I_WANT = -1;
-            }
-            else
-            {
-                pointCoordinatesListBox.is_from_outside = true;
-                pointCoordinatesListBox.Set_DeletedPoint(point, index);
-            }
-
-            redraw_custom_wholegraph();
+            SignalTypeTabControl.SelectedIndex = 3;
+            pointCoordinatesListBox.Set_AddedPoint(point, index);
         }
 
         #endregion
@@ -437,21 +392,17 @@ namespace ImpulseMaker
 
         private void write_csv_file()
         {
-            try
+            using (StreamWriter sw = File.CreateText(csv_path))
             {
-                using (StreamWriter sw = File.CreateText(csv_path))
+                for (int i = 0; i < (SamplingRateValue.Value * SignalDurationValue.Value); ++i)
                 {
-                    for (int i = 0; i < (SamplingRateValue.Value * SignalDurationValue.Value); ++i)
-                    {
-                        string line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
-                        for (int j = 0; j < Channels.Count; ++j)
-                            line += ((i < Channels[j].data.Length) ? Channels[j].data[i].ToString() : "")
-                                + csv_delimiter.ToString();
-                        sw.WriteLine(line.Trim(csv_delimiter));
-                    }
+                    string line = is_first_col_sr ? SamplingRateValue.Value.ToString() + ";" : "";
+                    for (int j = 0; j < Channels.Count; ++j)
+                        line += ((i < Channels[j].data.Length) ? Channels[j].data[i].ToString() : "")
+                            + csv_delimiter.ToString();
+                    sw.WriteLine(line.Trim(csv_delimiter));
                 }
             }
-            catch { return; }
         }
 
         #endregion
@@ -540,10 +491,8 @@ namespace ImpulseMaker
                     RampPeakTrackBar.Value = (int)(Convert.ToDecimal(RampPeakTrackerLabel.Text) /
                         Convert.ToDecimal(RampPeriodValue.Value) * 100);
                     ZeroEndingRampCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", name)) == 1;
-
-                    TAB_PAGE_I_WANT = 0;
+                    
                     SignalTypeTabControl.SelectedIndex = 0;
-                    TAB_PAGE_I_WANT = -1;
 
                     redraw_ramp();
                     redraw_ramp_wholegraph();
@@ -554,15 +503,13 @@ namespace ImpulseMaker
                     ImpulseBaseValue.Value = Convert.ToDecimal(MyIni.Read("BaseValue", name));
                     ImpulseLevelValue.Value = Convert.ToDecimal(MyIni.Read("LevelValue", name));
                     ImpulsePeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", name));
-                    SeveralSlidersImpulseTrackBar.Min = Convert.ToDecimal(MyIni.Read("Min", name));
-                    SeveralSlidersImpulseTrackBar.Max = Convert.ToDecimal(MyIni.Read("Max", name));
-                    SeveralSlidersImpulseTrackBar.SelectedMin = Convert.ToDecimal(MyIni.Read("LeftPos", name));
-                    SeveralSlidersImpulseTrackBar.SelectedMax = Convert.ToDecimal(MyIni.Read("RightPos", name));
+                    SeveralSlidersImpulseTrackBar.Min = (float)Convert.ToDecimal(MyIni.Read("Min", name));
+                    SeveralSlidersImpulseTrackBar.Max = (float)Convert.ToDecimal(MyIni.Read("Max", name));
+                    SeveralSlidersImpulseTrackBar.SelectedMin = (float)Convert.ToDecimal(MyIni.Read("LeftPos", name));
+                    SeveralSlidersImpulseTrackBar.SelectedMax = (float)Convert.ToDecimal(MyIni.Read("RightPos", name));
                     ZeroEndingImpulseCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", name)) == 1;
-
-                    TAB_PAGE_I_WANT = 1;
+                    
                     SignalTypeTabControl.SelectedIndex = 1;
-                    TAB_PAGE_I_WANT = -1;
 
                     redraw_impulse();
                     redraw_impulse_wholegraph();
@@ -580,9 +527,7 @@ namespace ImpulseMaker
                     for (int i = 0; i < dataset.Count(); ++i)
                         dataset[i] = new DataPoint(Convert.ToDouble(MyIni.Read("XP" + i, name)), Convert.ToDouble(MyIni.Read("YP" + i, name)));
 
-                    TAB_PAGE_I_WANT = 3;
                     SignalTypeTabControl.SelectedIndex = 3;
-                    TAB_PAGE_I_WANT = -1;
 
                     pointCoordinatesListBox.Set_DataSet(dataset);
 
@@ -652,9 +597,6 @@ namespace ImpulseMaker
 
         private void RampTabPage_Enter(object sender, EventArgs e)
         {
-            if (TAB_PAGE_I_WANT > 0)
-                return;
-
             SignalDurationValue.Minimum = RampPeriodValue.Value;
 
             is_drawing_busy = false;
@@ -716,11 +658,6 @@ namespace ImpulseMaker
             DataPoint[] dataset = new DataPoint[OneSegmentChart.Series[0].Points.Count];
             for (int i = 0; i < dataset.Count(); ++i)
                 dataset[i] = new DataPoint(OneSegmentChart.Series[0].Points[i].XValue, OneSegmentChart.Series[0].Points[i].YValues[0]);
-
-            if (!is_from_listbox)
-            {
-                CustomPeriodValue.Value = (decimal)OneSegmentChart.Series[0].Points.Last().XValue;
-            }
 
             pointCoordinatesListBox.Set_DataSet(dataset);
 
@@ -866,13 +803,10 @@ namespace ImpulseMaker
             for (i = 0; i < chart_points; ++i)
                 if ((decimal)xarr[i] > SignalDurationValue.Value)
                 {
-                    double time_part = xarr[i] - xarr[i - 1],
-                        time_to_fill = ((double)SignalDurationValue.Value - xarr[i - 1]) / time_part;
-
-                    yarr[i] = yarr[i - 1] + (yarr[i] - yarr[i - 1]) * time_to_fill;
-
                     xarr[i] = (double)SignalDurationValue.Value;
-
+                    yarr[i] = (double)RampPeakTrackBar.Value / 100 > segments % 1 ?
+                        yarr[i] = yarr[i] - (yarr[i] - yarr[i - 1]) * (Math.Abs(segments % 1 - (double)RampPeakTrackBar.Value / 100)) :
+                        yarr[i] = yarr[i - 1] + (yarr[i] - yarr[i - 1]) * (Math.Abs(segments % 1 - (double)RampPeakTrackBar.Value / 100));
                     break;
                 }
             for (; i < chart_points; ++i)
@@ -911,8 +845,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.WorkerSupportsCancellation = true;  
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveOneChannel);
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveChannel);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -941,7 +874,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1142,7 +1075,7 @@ namespace ImpulseMaker
 
         private void ImpulsePeriodValue_ValueChanged(object sender, EventArgs e)
         {
-            SeveralSlidersImpulseTrackBar.Max = ImpulsePeriodValue.Value;
+            SeveralSlidersImpulseTrackBar.Max = (float)ImpulsePeriodValue.Value;
             SignalDurationValue.Minimum = ImpulsePeriodValue.Value;
             ImpulsePeriodValue.Maximum = SignalDurationValue.Value;
 
@@ -1164,7 +1097,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveOneChannel);
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveChannel);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1193,7 +1126,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1311,19 +1244,7 @@ namespace ImpulseMaker
             }
 
             for (i = 0; i < chart_points; ++i)
-                if ((decimal)xarr[i] > SignalDurationValue.Value)
-                {
-                    double time_part = xarr[i] - xarr[i - 1],
-                        time_to_fill = ((double)SignalDurationValue.Value - xarr[i - 1]) / time_part;
-
-                    yarr[i] = yarr[i - 1] + (yarr[i] - yarr[i - 1]) * time_to_fill;
-                    
-                    xarr[i] = (double)SignalDurationValue.Value;
-
-                    break;
-                }
-            for (; i < chart_points; ++i)
-                if ((decimal)xarr[i] > SignalDurationValue.Value)
+                if (xarr[i] > (double)SignalDurationValue.Value)
                 {
                     xarr[i] = (double)SignalDurationValue.Value;
                     yarr[i] = yarr[i - 1];
@@ -1377,7 +1298,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveOneChannel);
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveChannel);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1406,7 +1327,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1428,32 +1349,28 @@ namespace ImpulseMaker
 
         private void SelectionRangeSlider_MouseClickMin(object sender, EventArgs e)
         {
-            nud_Min.DecimalPlaces = MathDecimals.GetDecimalPlaces(SeveralSlidersImpulseTrackBar.Max / 100);
+            nud_Min.DecimalPlaces = MathDecimals.GetDecimalPlaces((decimal)(SeveralSlidersImpulseTrackBar.Max / 100));
 
             var buff = (decimal)SeveralSlidersImpulseTrackBar.SelectedMin;
             nud_Min.Minimum = (decimal)SeveralSlidersImpulseTrackBar.Min;
             nud_Min.Maximum = (decimal)SeveralSlidersImpulseTrackBar.SelectedMax;
             nud_Min.Value = buff;
 
-            nud_Min.Location = PointToClient(MousePosition).X + nud_Min.Width < this.Width ? 
-                new Point(PointToClient(MousePosition).X, PointToClient(MousePosition).Y) :
-                new Point(PointToClient(MousePosition).X - nud_Min.Width, PointToClient(MousePosition).Y);
+            nud_Min.Location = new Point(PointToClient(MousePosition).X, PointToClient(MousePosition).Y);
 
             nud_Min.Show();
         }
 
         private void SelectionRangeSlider_MouseClickMax(object sender, EventArgs e)
         {
-            nud_Max.DecimalPlaces = MathDecimals.GetDecimalPlaces(SeveralSlidersImpulseTrackBar.Max / 100);
+            nud_Max.DecimalPlaces = MathDecimals.GetDecimalPlaces((decimal)(SeveralSlidersImpulseTrackBar.Max / 100));
 
             var buff = (decimal)SeveralSlidersImpulseTrackBar.SelectedMax;
             nud_Max.Minimum = (decimal)SeveralSlidersImpulseTrackBar.SelectedMin;
             nud_Max.Maximum = (decimal)SeveralSlidersImpulseTrackBar.Max;
             nud_Max.Value = buff;
 
-            nud_Max.Location = PointToClient(MousePosition).X + nud_Max.Width < this.Width ?
-                new Point(PointToClient(MousePosition).X, PointToClient(MousePosition).Y) :
-                new Point(PointToClient(MousePosition).X - nud_Max.Width, PointToClient(MousePosition).Y);
+            nud_Max.Location = new Point(PointToClient(MousePosition).X, PointToClient(MousePosition).Y);
 
             nud_Max.Show();
         }
@@ -1480,12 +1397,12 @@ namespace ImpulseMaker
 
         private void nud_Min_ValueChange(object sender, EventArgs e)
         {
-            SeveralSlidersImpulseTrackBar.SelectedMin = nud_Min.Value;
+            SeveralSlidersImpulseTrackBar.SelectedMin = (float)nud_Min.Value;
         }
 
         private void nud_Max_ValueChange(object sender, EventArgs e)
         {
-            SeveralSlidersImpulseTrackBar.SelectedMax = nud_Max.Value;
+            SeveralSlidersImpulseTrackBar.SelectedMax = (float)nud_Max.Value;
         }
 
         #endregion
@@ -1549,8 +1466,6 @@ namespace ImpulseMaker
                 return;
             }
 
-            is_from_listbox = true;
-
             read_ini_channel(Channels[ChannelsListBox.selected_item].name);
 
             try
@@ -1569,11 +1484,8 @@ namespace ImpulseMaker
             }
             catch
             {
-                is_from_listbox = false;
                 return;
             }
-
-            is_from_listbox = false;
         }
 
         private void ChannelsListBox_MoveSelectedUp(object sender, EventArgs e)
@@ -1583,7 +1495,7 @@ namespace ImpulseMaker
             int si = ChannelsListBox.get_item_to_move();
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1604,7 +1516,7 @@ namespace ImpulseMaker
             int si = ChannelsListBox.get_item_to_move();
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1633,9 +1545,9 @@ namespace ImpulseMaker
                 position.Y < nud_Min.Location.Y + nud_Min.Height + nud_Min.Height)
                 &&
                 !(position_ss.X > SeveralSlidersImpulseTrackBar.sMin.X - nud_Min.Height &&
-                position_ss.X < SeveralSlidersImpulseTrackBar.sMin.X + (decimal)SeveralSlidersImpulseTrackBar.sMin.rect.Width + nud_Min.Height &&
+                position_ss.X < SeveralSlidersImpulseTrackBar.sMin.X + SeveralSlidersImpulseTrackBar.sMin.rect.Width + nud_Min.Height &&
                 position_ss.Y > SeveralSlidersImpulseTrackBar.sMin.Y - nud_Min.Height &&
-                position_ss.Y < SeveralSlidersImpulseTrackBar.sMin.Y + (decimal)SeveralSlidersImpulseTrackBar.sMin.rect.Height + nud_Min.Height))
+                position_ss.Y < SeveralSlidersImpulseTrackBar.sMin.Y + SeveralSlidersImpulseTrackBar.sMin.rect.Height + nud_Min.Height))
                 SelectionRangeSlider_CursorLeftMin(sender, e);
 
             if (!(position.X > nud_Max.Location.X - nud_Max.Height &&
@@ -1644,9 +1556,9 @@ namespace ImpulseMaker
                 position.Y < nud_Max.Location.Y + nud_Max.Height + nud_Max.Height)
                 &&
                 !(position_ss.X > SeveralSlidersImpulseTrackBar.sMax.X - nud_Max.Height &&
-                position_ss.X < SeveralSlidersImpulseTrackBar.sMax.X + (decimal)SeveralSlidersImpulseTrackBar.sMax.rect.Width + nud_Max.Height &&
+                position_ss.X < SeveralSlidersImpulseTrackBar.sMax.X + SeveralSlidersImpulseTrackBar.sMax.rect.Width + nud_Max.Height &&
                 position_ss.Y > SeveralSlidersImpulseTrackBar.sMax.Y - nud_Max.Height &&
-                position_ss.Y < SeveralSlidersImpulseTrackBar.sMax.Y + (decimal)SeveralSlidersImpulseTrackBar.sMax.rect.Height + nud_Max.Height))
+                position_ss.Y < SeveralSlidersImpulseTrackBar.sMax.Y + SeveralSlidersImpulseTrackBar.sMax.rect.Height + nud_Max.Height))
                 SelectionRangeSlider_CursorLeftMax(sender, e);
         }
 
@@ -1658,19 +1570,15 @@ namespace ImpulseMaker
             if (!(position.X > nud_Min.Location.X && position.X < nud_Min.Location.X + nud_Min.Width &&
                 position.Y > nud_Min.Location.Y && position.Y < nud_Min.Location.Y + nud_Min.Height)
                 &&
-                !(position_ss.X > SeveralSlidersImpulseTrackBar.sMin.X &&
-                position_ss.X < SeveralSlidersImpulseTrackBar.sMin.X + (decimal)SeveralSlidersImpulseTrackBar.sMin.rect.Width &&
-                position_ss.Y > SeveralSlidersImpulseTrackBar.sMin.Y &&
-                position_ss.Y < SeveralSlidersImpulseTrackBar.sMin.Y + (decimal)SeveralSlidersImpulseTrackBar.sMin.rect.Height))
+                !(position_ss.X > SeveralSlidersImpulseTrackBar.sMin.X && position_ss.X < SeveralSlidersImpulseTrackBar.sMin.X + SeveralSlidersImpulseTrackBar.sMin.rect.Width &&
+                position_ss.Y > SeveralSlidersImpulseTrackBar.sMin.Y && position_ss.Y < SeveralSlidersImpulseTrackBar.sMin.Y + SeveralSlidersImpulseTrackBar.sMin.rect.Height))
                 nud_Min.Hide();
 
             if (!(position.X > nud_Max.Location.X && position.X < nud_Max.Location.X + nud_Max.Width &&
                 position.Y > nud_Max.Location.Y && position.Y < nud_Max.Location.Y + nud_Max.Height)
                 &&
-                !(position_ss.X > SeveralSlidersImpulseTrackBar.sMax.X &&
-                position_ss.X < SeveralSlidersImpulseTrackBar.sMax.X + (decimal)SeveralSlidersImpulseTrackBar.sMax.rect.Width &&
-                position_ss.Y > SeveralSlidersImpulseTrackBar.sMax.Y &&
-                position_ss.Y < SeveralSlidersImpulseTrackBar.sMax.Y + (decimal)SeveralSlidersImpulseTrackBar.sMax.rect.Height))
+                !(position_ss.X > SeveralSlidersImpulseTrackBar.sMax.X && position_ss.X < SeveralSlidersImpulseTrackBar.sMax.X + SeveralSlidersImpulseTrackBar.sMax.rect.Width &&
+                position_ss.Y > SeveralSlidersImpulseTrackBar.sMax.Y && position_ss.Y < SeveralSlidersImpulseTrackBar.sMax.Y + SeveralSlidersImpulseTrackBar.sMax.rect.Height))
                 nud_Max.Hide();
         }
 
@@ -1746,23 +1654,44 @@ namespace ImpulseMaker
             data = new double[(int)(controls[0] * controls[1])];
 
             double segments = controls[0] / controls[2];
-            int points_per_segment = (int)((double)data.Length / segments), i, j, k, h;
+            int points_per_segment = (int)((double)data.Length / segments), i, j, k, h, ind;
             if (points_per_segment <= 0)
                 return -1;
 
-            for (i = 0, j = 0, k = 1; ; ++k)
+            //for (i = 0, j = 0, k = 1; ; ++k)
+            //{
+            //    //if (k >= points.Count()) k = 1;
+            //    if (j < points_per_segment)
+            //    {
+            //        int points_between = (int)Math.Ceiling((points[k].XValue - points[k - 1].XValue) /
+            //            (points[points.Count() - 1].XValue - points[0].XValue) * points_per_segment);
+            //        double increment = (points[k].YValues[0] - points[k - 1].YValues[0]) / points_between;
+            //        for (h = 0, data[i] = points[k - 1].YValues[0]; ;
+            //            i = i < data.Count() - 1 ? ++i : i, data[i] = data[i - 1] + increment, ++h, ++j)
+            //            if (h == points_between && j == points_per_segment)
+            //                break;
+            //            else if (h < points_between)
+            //                break;
+            //        if (i >= data.Count() - 1)
+            //            break;
+            //    }
+            //    else { j = 0; k = 1;  }
+            //}
+
+            for (i = 0, ind = 0; i < segments; ++i)
             {
-                if (k >= points.Count()) k = 1;
-                if (j >= points_per_segment) j = 0;
-                int points_between = (int)Math.Ceiling((points[k].XValue - points[k - 1].XValue) /
+                for (j = 0, k = 1; j < points_per_segment && ind < data.Count(); k = k < points.Count() - 1 ? ++k : k)
+                {
+                    int points_between = (int)Math.Ceiling((points[k].XValue - points[k - 1].XValue) /
                     (points[points.Count() - 1].XValue - points[0].XValue) * points_per_segment);
-                double increment = (points[k].YValues[0] - points[k - 1].YValues[0]) / points_between;
-                for (h = 0, data[i] = points[k - 1].YValues[0], ++i, ++j; h < points_between; ++i, ++h, ++j)
-                    if (j < points_per_segment && i < data.Count())
-                        data[i] = data[i - 1] + increment;
-                    else break;
-                if (i >= data.Count() - 1)
-                    break;
+
+                    double increment = (points[k].YValues[0] - points[k - 1].YValues[0]) / (k < points.Count() - 1 ? points_between : points_per_segment - j);
+
+                    for (h = 0, data[ind] = points[k - 1].YValues[0], ++ind, ++j; h < points_between; ++h, ++ind, ++j)
+                        if (j < points_per_segment && ind < data.Count())
+                            data[ind] = data[ind - 1] + increment;
+                        else break;
+                }
             }
 
             if (controls[3] == 1)
@@ -1780,7 +1709,7 @@ namespace ImpulseMaker
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
             BackgroundWorker bgw = new BackgroundWorker();
-            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.DoWork += new DoWorkEventHandler(bgw_DoWork);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
             IniFile MyIni = new IniFile(ini_path);
@@ -1790,71 +1719,69 @@ namespace ImpulseMaker
             bgw.RunWorkerAsync();
         }
 
-        private void bgw_SaveAllChannels(object sender, DoWorkEventArgs e)
+        private void bgw_DoWork(object sender, DoWorkEventArgs e)
         {
             IniFile MyIni = new IniFile(ini_path);
 
-            for (int i = 0; i < Channels.Count; ++i)
+            foreach (var ch in Channels)
             {
-                if (!MyIni.KeyExists("Type", Channels[i].name))
+                if (!MyIni.KeyExists("Type", ch.name))
                     continue;
 
                 double[] data = new double[0];
 
-                switch (Convert.ToInt32(MyIni.Read("Type", Channels[i].name)))
+                switch (Convert.ToInt32(MyIni.Read("Type", ch.name)))
                 {
                     case 0:
                         {
-                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(Channels[i].name).ToString(), Channels[i].name);
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ch.name).ToString(), ch.name);
                             double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
                                                 Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
-                                                Convert.ToDouble(MyIni.Read("Period", Channels[i].name)),
+                                                Convert.ToDouble(MyIni.Read("Period", ch.name)),
                                                 (int)(Convert.ToDecimal(RampPeakTrackerLabel.Text) /
                                                 Convert.ToDecimal(RampPeriodValue.Value) * 100),
-                                                Convert.ToDouble(MyIni.Read("BeginValue", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("PeakValue", Channels[i].name)),
-                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1 ? 1 : 0};
+                                                Convert.ToDouble(MyIni.Read("BeginValue", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("PeakValue", ch.name)),
+                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1 ? 1 : 0};
 
                             if (calculate_ramp_channel(ref data, ref controls) == 0)
-                                save_csv_channel(Channels[i].name, ref data);
+                                save_csv_channel(ch.name, ref data);
                             break;
                         }
                     case 1:
                         {
-                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(Channels[i].name).ToString(), Channels[i].name);
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ch.name).ToString(), ch.name);
                             double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
                                                 Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
-                                                Convert.ToDouble(MyIni.Read("Period", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("LeftPos", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("RightPos", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("Min", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("Max", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("BaseValue", Channels[i].name)),
-                                                Convert.ToDouble(MyIni.Read("LevelValue", Channels[i].name)),
-                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1 ? 1 : 0};
+                                                Convert.ToDouble(MyIni.Read("Period", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("LeftPos", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("RightPos", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("Min", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("Max", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("BaseValue", ch.name)),
+                                                Convert.ToDouble(MyIni.Read("LevelValue", ch.name)),
+                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1 ? 1 : 0};
 
                             if (calculate_impulse_channel(ref data, ref controls) == 0)
-                                save_csv_channel(Channels[i].name, ref data);
+                                save_csv_channel(ch.name, ref data);
                             break;
                         }
                     case 2:
                         break;
                     case 3:
                         {
-                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(Channels[i].name).ToString(), Channels[i].name);
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(ch.name).ToString(), ch.name);
                             double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
                                                 Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
-                                                Convert.ToDouble(MyIni.Read("Period", Channels[i].name)),
-                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1 ? 1 : 0};
+                                                Convert.ToDouble(MyIni.Read("Period", ch.name)),
+                                                Convert.ToInt32(MyIni.Read("IsZeroEnding", ch.name)) == 1 ? 1 : 0};
 
-                            DataPoint[] dataset = new DataPoint[Convert.ToInt32(MyIni.Read("Length", Channels[i].name))];
-
-                            for (int j = 0; j < dataset.Count(); ++j)
-                                dataset[j] = new DataPoint(Convert.ToDouble(MyIni.Read("XP" + j, Channels[i].name)),
-                                    Convert.ToDouble(MyIni.Read("YP" + j, Channels[i].name)));
+                            DataPoint[] dataset = pointCoordinatesListBox.Get_DataSet();
+                            if (dataset == null)
+                                continue;
 
                             if (calculate_custom_channel(ref data, ref controls, ref dataset) == 0)
-                                save_csv_channel(Channels[i].name, ref data);
+                                save_csv_channel(ch_name_to_save, ref data);
                         }
                         break;
                     default:
@@ -1876,23 +1803,15 @@ namespace ImpulseMaker
 
         private void cSVFilePathToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog()
-            {
-                InitialDirectory = csv_path.Remove(csv_path.LastIndexOf('\\') + 1, csv_file_name.Count()),
-                DefaultExt = ".csv",
-                Filter = "csv files (*.csv)|*.csv",
-                AddExtension = true,
-                Multiselect = false,
-                SupportMultiDottedExtensions = false
-            };
-            if (ofd.ShowDialog() != DialogResult.OK ||
-                !ofd.SafeFileName.EndsWith(".csv"))
+            FolderBrowserDialog fb = new FolderBrowserDialog();
+            fb.ShowDialog();
+            if (fb.SelectedPath == "")
                 return;
 
-            csv_path = ofd.FileName;
-            csv_file_name = ofd.SafeFileName;
-
             RegistryKey key = Registry.CurrentUser.CreateSubKey("SignalMaker", true);
+            csv_path = fb.SelectedPath + "\\" + csv_file_name;
+            if (csv_path.First() == '\\')
+                csv_path = csv_path.Substring(1, csv_path.Length - 1);
             key.SetValue("CSV", csv_path);
 
             this.cSVFilePathToolStripMenuItem.ToolTipText = "Current CSV file path: " + csv_path;
@@ -1900,30 +1819,19 @@ namespace ImpulseMaker
             key.Close();
 
             init_frame(sender, e);
-
-            ChannelsListBox.Invalidate();
         }
-        
+
         private void iNIFilePathToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            OpenFileDialog ofd = new OpenFileDialog()
-            { 
-                InitialDirectory = ini_path.Remove(ini_path.LastIndexOf('\\') + 1, ini_file_name.Count()),
-                DefaultExt = ".ini",
-                Filter = "ini files (*.ini)|*.ini",
-                AddExtension = true,
-                Multiselect = false,
-                SupportMultiDottedExtensions = false,
-                CheckFileExists = false
-            };
-            if (ofd.ShowDialog() != DialogResult.OK ||
-                !ofd.SafeFileName.EndsWith(".ini"))
+            FolderBrowserDialog fb = new FolderBrowserDialog();
+            fb.ShowDialog();
+            if (fb.SelectedPath == "")
                 return;
 
-            ini_path = ofd.FileName;
-            ini_file_name = ofd.SafeFileName;
-            
             RegistryKey key = Registry.CurrentUser.CreateSubKey("SignalMaker", true);
+            ini_path = fb.SelectedPath + "\\" + ini_file_name;
+            if (ini_path.First() == '\\')
+                ini_path = ini_path.Substring(1, ini_path.Length - 1);
             key.SetValue("INI", ini_path);
 
             this.iNIFilePathToolStripMenuItem.ToolTipText = "Current INI file path: " + ini_path;
@@ -1938,8 +1846,6 @@ namespace ImpulseMaker
             catch { }
 
             init_frame(sender, e);
-
-            ChannelsListBox.Invalidate();
         }
 
         #endregion
