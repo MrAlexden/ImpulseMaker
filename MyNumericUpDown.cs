@@ -11,7 +11,8 @@ namespace ImpulseMaker
     internal class MyNumericUpDown : NumericUpDown
     {
         public event EventHandler ValueChangedBeforeLeave;
-        bool is_value_changed = false;
+        bool is_value_changed_manually = false,
+            is_mouse_in = false;
 
         public MyNumericUpDown()
         {
@@ -19,6 +20,18 @@ namespace ImpulseMaker
             this.ValueChanged += new EventHandler(MyNumericUpDown_ValueChanged);
             this.MouseEnter += new EventHandler(MyNumericUpDown_MouseEnter);
             this.MouseLeave += new EventHandler(MyNumericUpDown_MouseLeave);
+            this.GotFocus += new EventHandler(MyNumericUpDown_GotFocus);
+            this.LostFocus += new EventHandler(MyNumericUpDown_LostFocus);
+            this.KeyDown += new KeyEventHandler(MyNumericUpDown_KeyDown);
+        }
+
+        void MyNumericUpDown_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                if (ValueChangedBeforeLeave != null)
+                    ValueChangedBeforeLeave(this, null);
+            }
         }
 
         void MyNumericUpDown_KeyPress(object sender, KeyPressEventArgs e)
@@ -31,20 +44,32 @@ namespace ImpulseMaker
 
         void MyNumericUpDown_ValueChanged(object sender, EventArgs e)
         {
-            is_value_changed = true;
+            is_value_changed_manually = is_mouse_in;
         }
 
         void MyNumericUpDown_MouseEnter(object sender, EventArgs e)
         {
-            is_value_changed = false;
+            is_value_changed_manually = false;
+            is_mouse_in = true;
         }
 
         void MyNumericUpDown_MouseLeave(object sender, EventArgs e)
         {
-            if (is_value_changed && ValueChangedBeforeLeave != null)
+            if (is_value_changed_manually && ValueChangedBeforeLeave != null)
                 ValueChangedBeforeLeave(this, null);
 
-            is_value_changed = false;
+            is_value_changed_manually = false;
+            is_mouse_in = false;
+        }
+
+        void MyNumericUpDown_GotFocus(object sender, EventArgs e)
+        {
+            is_mouse_in = true;
+        }
+
+        void MyNumericUpDown_LostFocus(object sender, EventArgs e)
+        {
+            is_mouse_in = false;
         }
     }
 }

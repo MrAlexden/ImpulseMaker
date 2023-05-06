@@ -139,13 +139,13 @@ namespace ImpulseMaker
         public bool enable_add_point
         {
             get { return e_a_p; }
-            set { e_a_p = value; Invalidate(); }
+            set { e_a_p = value; recalc_chart_area = true; Invalidate(); }
         }
 
         public bool is_able_to_choose
         {
             get { return is_a_t_ch; }
-            set { is_a_t_ch = value; Invalidate(); }
+            set { is_a_t_ch = value; recalc_chart_area = true; Invalidate(); }
         }
 
         public double point_value_X_margin
@@ -743,8 +743,9 @@ namespace ImpulseMaker
             /* Было ли ЛКМ во время добавления узла на график */
             if (is_in_chart_area && this.Cursor == Cursors.Cross && e.Button == MouseButtons.Left && point_to_highlight < 0)
             {
-                Series[selected_series].Points.Insert(potentially_new_point_index, new DataPoint(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X),
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y)));
+                Series[selected_series].Points.Insert(potentially_new_point_index,
+                    new DataPoint(RoundWithXMargin(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X)),
+                                    RoundWithYMargin(this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y))));
 
                 if (PointAdded != null)
                     PointAdded(Series[selected_series].Points[potentially_new_point_index], potentially_new_point_index);
@@ -1106,6 +1107,9 @@ namespace ImpulseMaker
                 parent.Leave += new EventHandler(PointValuesSelection_Close);
                 parent.MouseMove += new MouseEventHandler(PointValuesSelection_MouseMove);
 
+                if (parent.X_margin_needed != null)
+                    parent.X_margin_needed(parent, null);
+
                 if (_point_to_highlight == 0 ||
                     _point_to_highlight == parent.Series[_selected_series].Points.Count - 1)
                 {
@@ -1131,6 +1135,9 @@ namespace ImpulseMaker
 
             void PointValuesSelection_Ok(object sender, EventArgs e)
             {
+                if (_parent.X_margin_needed != null)
+                    _parent.X_margin_needed(_parent, null);
+
                 _parent.Series[_selected_series].Points[_point_to_highlight].XValue = _parent.RoundWithXMargin((double)input_box_X.Value);
                 _parent.Series[_selected_series].Points[_point_to_highlight].YValues[0] = _parent.RoundWithYMargin((double)input_box_Y.Value);
                 _parent.ChartAreas[0].AxisY.Minimum = (double)input_box_Y.Value < _parent.ChartAreas[0].AxisY.Minimum ?

@@ -69,20 +69,31 @@ namespace ImpulseMaker
             this.ImpulseLevelValue = new ImpulseMaker.MyNumericUpDown();
             this.SeveralSlidersImpulseTrackBar = new ImpulseMaker.SeveralSlidersTrackBar();
             this.SineTabPage = new System.Windows.Forms.TabPage();
-            this.numericUpDown3 = new ImpulseMaker.MyNumericUpDown();
-            this.numericUpDown1 = new ImpulseMaker.MyNumericUpDown();
+            this.SinePeriodValueLabel = new System.Windows.Forms.Label();
+            this.SineAmplitudeLabel = new System.Windows.Forms.Label();
+            this.SineLevelLabel = new System.Windows.Forms.Label();
+            this.DeleteSineChannelButton = new System.Windows.Forms.Button();
+            this.ZeroEndingSineCheckBox = new System.Windows.Forms.CheckBox();
+            this.SineChannelName = new System.Windows.Forms.TextBox();
+            this.SaveSineChannelLabel = new System.Windows.Forms.Label();
+            this.SaveSineChannelButton = new System.Windows.Forms.Button();
+            this.SineAngleTrackerLabel = new System.Windows.Forms.Label();
+            this.SineAngleTrackBar = new System.Windows.Forms.TrackBar();
+            this.SineAngleTrackBarLabel = new System.Windows.Forms.Label();
+            this.SinePeriodValue = new ImpulseMaker.MyNumericUpDown();
+            this.SineAmplitudeValue = new ImpulseMaker.MyNumericUpDown();
+            this.SineLevelValue = new ImpulseMaker.MyNumericUpDown();
             this.CustomTabPage = new System.Windows.Forms.TabPage();
             this.CustomPeriodValueLabel = new System.Windows.Forms.Label();
-            this.CustomPeriodValue = new ImpulseMaker.MyNumericUpDown();
             this.ZeroEndingCustomCheckBox = new System.Windows.Forms.CheckBox();
             this.DeleteCustomChannelButton = new System.Windows.Forms.Button();
             this.CustomChannelName = new System.Windows.Forms.TextBox();
             this.SaveCustomChannelLabel = new System.Windows.Forms.Label();
             this.SaveCustomChannelButton = new System.Windows.Forms.Button();
+            this.CustomPeriodValue = new ImpulseMaker.MyNumericUpDown();
             this.pointCoordinatesListBox = new ImpulseMaker.PointCoordinatesListBox();
             this.SamplingRateLabel = new System.Windows.Forms.Label();
             this.SignalDurationLabel = new System.Windows.Forms.Label();
-            this.SaveAllChannelsButton = new System.Windows.Forms.Button();
             this.SaveAllChannelsProgress = new System.Windows.Forms.ProgressBar();
             this.SaveAllChannelsLabel = new System.Windows.Forms.Label();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
@@ -107,8 +118,10 @@ namespace ImpulseMaker
             ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).BeginInit();
             this.SineTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAngleTrackBar)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).BeginInit();
             this.CustomTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).BeginInit();
             this.menuStrip1.SuspendLayout();
@@ -237,9 +250,9 @@ namespace ImpulseMaker
             this.SaveRampChannelLabel.AutoSize = true;
             this.SaveRampChannelLabel.Location = new System.Drawing.Point(6, 301);
             this.SaveRampChannelLabel.Name = "SaveRampChannelLabel";
-            this.SaveRampChannelLabel.Size = new System.Drawing.Size(164, 13);
+            this.SaveRampChannelLabel.Size = new System.Drawing.Size(99, 13);
             this.SaveRampChannelLabel.TabIndex = 2;
-            this.SaveRampChannelLabel.Text = "Сохранить канал с названием:";
+            this.SaveRampChannelLabel.Text = "Название канала:";
             // 
             // RampPeakTrackBarLabel
             // 
@@ -361,7 +374,7 @@ namespace ImpulseMaker
             this.ImpulseTabPage.Padding = new System.Windows.Forms.Padding(3);
             this.ImpulseTabPage.Size = new System.Drawing.Size(254, 351);
             this.ImpulseTabPage.TabIndex = 2;
-            this.ImpulseTabPage.Text = "Импульс";
+            this.ImpulseTabPage.Text = "Прямоугольник";
             this.ImpulseTabPage.UseVisualStyleBackColor = true;
             this.ImpulseTabPage.Enter += new System.EventHandler(this.ImpulseTabPage_Enter);
             // 
@@ -401,9 +414,9 @@ namespace ImpulseMaker
             this.SaveImpulseChannelLabel.AutoSize = true;
             this.SaveImpulseChannelLabel.Location = new System.Drawing.Point(6, 301);
             this.SaveImpulseChannelLabel.Name = "SaveImpulseChannelLabel";
-            this.SaveImpulseChannelLabel.Size = new System.Drawing.Size(164, 13);
+            this.SaveImpulseChannelLabel.Size = new System.Drawing.Size(99, 13);
             this.SaveImpulseChannelLabel.TabIndex = 10;
-            this.SaveImpulseChannelLabel.Text = "Сохранить канал с названием:";
+            this.SaveImpulseChannelLabel.Text = "Название канала:";
             // 
             // ImpulsePeriodValueLabel
             // 
@@ -530,21 +543,50 @@ namespace ImpulseMaker
             // 
             this.SeveralSlidersImpulseTrackBar.Location = new System.Drawing.Point(1, 185);
             this.SeveralSlidersImpulseTrackBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.SeveralSlidersImpulseTrackBar.Max = 0.1m;
-            this.SeveralSlidersImpulseTrackBar.Min = 0m;
+            this.SeveralSlidersImpulseTrackBar.Max = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.SeveralSlidersImpulseTrackBar.Min = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
             this.SeveralSlidersImpulseTrackBar.Name = "SeveralSlidersImpulseTrackBar";
-            this.SeveralSlidersImpulseTrackBar.SelectedMax = 0.015m;
-            this.SeveralSlidersImpulseTrackBar.SelectedMin = 0.008m;
+            this.SeveralSlidersImpulseTrackBar.SelectedMax = new decimal(new int[] {
+            15,
+            0,
+            0,
+            196608});
+            this.SeveralSlidersImpulseTrackBar.SelectedMin = new decimal(new int[] {
+            8,
+            0,
+            0,
+            196608});
             this.SeveralSlidersImpulseTrackBar.Size = new System.Drawing.Size(249, 58);
             this.SeveralSlidersImpulseTrackBar.TabIndex = 1;
+            this.SeveralSlidersImpulseTrackBar.margin_needed += new System.EventHandler(this.SeveralSlidersTrackBar_margin_needed);
             this.SeveralSlidersImpulseTrackBar.SelectionChanged += new System.EventHandler(this.impulse_graph);
             this.SeveralSlidersImpulseTrackBar.MinClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMin);
             this.SeveralSlidersImpulseTrackBar.MaxClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMax);
             // 
             // SineTabPage
             // 
-            this.SineTabPage.Controls.Add(this.numericUpDown3);
-            this.SineTabPage.Controls.Add(this.numericUpDown1);
+            this.SineTabPage.Controls.Add(this.SinePeriodValueLabel);
+            this.SineTabPage.Controls.Add(this.SineAmplitudeLabel);
+            this.SineTabPage.Controls.Add(this.SineLevelLabel);
+            this.SineTabPage.Controls.Add(this.DeleteSineChannelButton);
+            this.SineTabPage.Controls.Add(this.ZeroEndingSineCheckBox);
+            this.SineTabPage.Controls.Add(this.SineChannelName);
+            this.SineTabPage.Controls.Add(this.SaveSineChannelLabel);
+            this.SineTabPage.Controls.Add(this.SaveSineChannelButton);
+            this.SineTabPage.Controls.Add(this.SineAngleTrackerLabel);
+            this.SineTabPage.Controls.Add(this.SineAngleTrackBar);
+            this.SineTabPage.Controls.Add(this.SineAngleTrackBarLabel);
+            this.SineTabPage.Controls.Add(this.SinePeriodValue);
+            this.SineTabPage.Controls.Add(this.SineAmplitudeValue);
+            this.SineTabPage.Controls.Add(this.SineLevelValue);
             this.SineTabPage.Location = new System.Drawing.Point(4, 22);
             this.SineTabPage.Name = "SineTabPage";
             this.SineTabPage.Padding = new System.Windows.Forms.Padding(3);
@@ -554,36 +596,187 @@ namespace ImpulseMaker
             this.SineTabPage.UseVisualStyleBackColor = true;
             this.SineTabPage.Enter += new System.EventHandler(this.SineTabPage_Enter);
             // 
-            // numericUpDown3
+            // SinePeriodValueLabel
             // 
-            this.numericUpDown3.Location = new System.Drawing.Point(10, 127);
-            this.numericUpDown3.Name = "numericUpDown3";
-            this.numericUpDown3.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown3.TabIndex = 0;
+            this.SinePeriodValueLabel.AutoSize = true;
+            this.SinePeriodValueLabel.Location = new System.Drawing.Point(6, 96);
+            this.SinePeriodValueLabel.Name = "SinePeriodValueLabel";
+            this.SinePeriodValueLabel.Size = new System.Drawing.Size(72, 13);
+            this.SinePeriodValueLabel.TabIndex = 22;
+            this.SinePeriodValueLabel.Text = "Период, сек:";
             // 
-            // numericUpDown1
+            // SineAmplitudeLabel
             // 
-            this.numericUpDown1.Location = new System.Drawing.Point(10, 85);
-            this.numericUpDown1.Name = "numericUpDown1";
-            this.numericUpDown1.Size = new System.Drawing.Size(120, 20);
-            this.numericUpDown1.TabIndex = 0;
+            this.SineAmplitudeLabel.AutoSize = true;
+            this.SineAmplitudeLabel.Location = new System.Drawing.Point(6, 55);
+            this.SineAmplitudeLabel.Name = "SineAmplitudeLabel";
+            this.SineAmplitudeLabel.Size = new System.Drawing.Size(78, 13);
+            this.SineAmplitudeLabel.TabIndex = 20;
+            this.SineAmplitudeLabel.Text = "Амплитуда, В:";
+            // 
+            // SineLevelLabel
+            // 
+            this.SineLevelLabel.AutoSize = true;
+            this.SineLevelLabel.Location = new System.Drawing.Point(6, 14);
+            this.SineLevelLabel.Name = "SineLevelLabel";
+            this.SineLevelLabel.Size = new System.Drawing.Size(67, 13);
+            this.SineLevelLabel.TabIndex = 21;
+            this.SineLevelLabel.Text = "Уровень, В:";
+            // 
+            // DeleteSineChannelButton
+            // 
+            this.DeleteSineChannelButton.BackgroundImage = global::ImpulseMaker.Properties.Resources.png_transparent_icon_design_trash_red_line_area_material_rectangle;
+            this.DeleteSineChannelButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.DeleteSineChannelButton.Location = new System.Drawing.Point(225, 313);
+            this.DeleteSineChannelButton.Name = "DeleteSineChannelButton";
+            this.DeleteSineChannelButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.DeleteSineChannelButton.Size = new System.Drawing.Size(25, 25);
+            this.DeleteSineChannelButton.TabIndex = 19;
+            this.DeleteSineChannelButton.UseVisualStyleBackColor = true;
+            this.DeleteSineChannelButton.Click += new System.EventHandler(this.DeleteSineChannelButton_Click);
+            // 
+            // ZeroEndingSineCheckBox
+            // 
+            this.ZeroEndingSineCheckBox.AutoSize = true;
+            this.ZeroEndingSineCheckBox.Location = new System.Drawing.Point(9, 251);
+            this.ZeroEndingSineCheckBox.Name = "ZeroEndingSineCheckBox";
+            this.ZeroEndingSineCheckBox.RightToLeft = System.Windows.Forms.RightToLeft.Yes;
+            this.ZeroEndingSineCheckBox.Size = new System.Drawing.Size(163, 17);
+            this.ZeroEndingSineCheckBox.TabIndex = 18;
+            this.ZeroEndingSineCheckBox.Text = "Заканчивать сигнал нулем";
+            this.ZeroEndingSineCheckBox.UseVisualStyleBackColor = true;
+            this.ZeroEndingSineCheckBox.CheckedChanged += new System.EventHandler(this.ZeroEndingSineCheckBox_CheckedChange);
+            // 
+            // SineChannelName
+            // 
+            this.SineChannelName.Location = new System.Drawing.Point(9, 317);
+            this.SineChannelName.Name = "SineChannelName";
+            this.SineChannelName.Size = new System.Drawing.Size(181, 20);
+            this.SineChannelName.TabIndex = 17;
+            // 
+            // SaveSineChannelLabel
+            // 
+            this.SaveSineChannelLabel.AutoSize = true;
+            this.SaveSineChannelLabel.Location = new System.Drawing.Point(6, 301);
+            this.SaveSineChannelLabel.Name = "SaveSineChannelLabel";
+            this.SaveSineChannelLabel.Size = new System.Drawing.Size(99, 13);
+            this.SaveSineChannelLabel.TabIndex = 15;
+            this.SaveSineChannelLabel.Text = "Название канала:";
+            // 
+            // SaveSineChannelButton
+            // 
+            this.SaveSineChannelButton.BackgroundImage = ((System.Drawing.Image)(resources.GetObject("SaveSineChannelButton.BackgroundImage")));
+            this.SaveSineChannelButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
+            this.SaveSineChannelButton.Location = new System.Drawing.Point(195, 313);
+            this.SaveSineChannelButton.Name = "SaveSineChannelButton";
+            this.SaveSineChannelButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
+            this.SaveSineChannelButton.Size = new System.Drawing.Size(25, 25);
+            this.SaveSineChannelButton.TabIndex = 16;
+            this.SaveSineChannelButton.UseVisualStyleBackColor = true;
+            this.SaveSineChannelButton.Click += new System.EventHandler(this.SaveSineChannelButton_Click);
+            // 
+            // SineAngleTrackerLabel
+            // 
+            this.SineAngleTrackerLabel.AutoSize = true;
+            this.SineAngleTrackerLabel.Location = new System.Drawing.Point(213, 167);
+            this.SineAngleTrackerLabel.Name = "SineAngleTrackerLabel";
+            this.SineAngleTrackerLabel.Size = new System.Drawing.Size(25, 13);
+            this.SineAngleTrackerLabel.TabIndex = 7;
+            this.SineAngleTrackerLabel.Text = "180";
+            // 
+            // SineAngleTrackBar
+            // 
+            this.SineAngleTrackBar.Location = new System.Drawing.Point(9, 185);
+            this.SineAngleTrackBar.Maximum = 72;
+            this.SineAngleTrackBar.Name = "SineAngleTrackBar";
+            this.SineAngleTrackBar.Size = new System.Drawing.Size(229, 45);
+            this.SineAngleTrackBar.TabIndex = 6;
+            this.SineAngleTrackBar.TickStyle = System.Windows.Forms.TickStyle.Both;
+            this.SineAngleTrackBar.Value = 36;
+            this.SineAngleTrackBar.ValueChanged += new System.EventHandler(this.SineAngleTrackBar_ValueChanged);
+            // 
+            // SineAngleTrackBarLabel
+            // 
+            this.SineAngleTrackBarLabel.AutoSize = true;
+            this.SineAngleTrackBarLabel.Location = new System.Drawing.Point(6, 167);
+            this.SineAngleTrackBarLabel.Name = "SineAngleTrackBarLabel";
+            this.SineAngleTrackBarLabel.Size = new System.Drawing.Size(85, 13);
+            this.SineAngleTrackBarLabel.TabIndex = 5;
+            this.SineAngleTrackBarLabel.Text = "Угол поворота:";
+            // 
+            // SinePeriodValue
+            // 
+            this.SinePeriodValue.DecimalPlaces = 3;
+            this.SinePeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.SinePeriodValue.Location = new System.Drawing.Point(9, 113);
+            this.SinePeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.SinePeriodValue.Name = "SinePeriodValue";
+            this.SinePeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.SinePeriodValue.TabIndex = 8;
+            this.SinePeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.SinePeriodValue.ValueChanged += new System.EventHandler(this.SinePeriodValue_ValueChanged);
+            // 
+            // SineAmplitudeValue
+            // 
+            this.SineAmplitudeValue.DecimalPlaces = 2;
+            this.SineAmplitudeValue.Location = new System.Drawing.Point(9, 72);
+            this.SineAmplitudeValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.SineAmplitudeValue.Name = "SineAmplitudeValue";
+            this.SineAmplitudeValue.Size = new System.Drawing.Size(120, 20);
+            this.SineAmplitudeValue.TabIndex = 0;
+            this.SineAmplitudeValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.SineAmplitudeValue.ValueChanged += new System.EventHandler(this.sine_graph);
+            // 
+            // SineLevelValue
+            // 
+            this.SineLevelValue.DecimalPlaces = 2;
+            this.SineLevelValue.Location = new System.Drawing.Point(9, 31);
+            this.SineLevelValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.SineLevelValue.Name = "SineLevelValue";
+            this.SineLevelValue.Size = new System.Drawing.Size(120, 20);
+            this.SineLevelValue.TabIndex = 0;
+            this.SineLevelValue.ValueChanged += new System.EventHandler(this.sine_graph);
             // 
             // CustomTabPage
             // 
             this.CustomTabPage.Controls.Add(this.CustomPeriodValueLabel);
-            this.CustomTabPage.Controls.Add(this.CustomPeriodValue);
             this.CustomTabPage.Controls.Add(this.ZeroEndingCustomCheckBox);
             this.CustomTabPage.Controls.Add(this.DeleteCustomChannelButton);
             this.CustomTabPage.Controls.Add(this.CustomChannelName);
             this.CustomTabPage.Controls.Add(this.SaveCustomChannelLabel);
             this.CustomTabPage.Controls.Add(this.SaveCustomChannelButton);
+            this.CustomTabPage.Controls.Add(this.CustomPeriodValue);
             this.CustomTabPage.Controls.Add(this.pointCoordinatesListBox);
             this.CustomTabPage.Location = new System.Drawing.Point(4, 22);
             this.CustomTabPage.Margin = new System.Windows.Forms.Padding(2);
             this.CustomTabPage.Name = "CustomTabPage";
             this.CustomTabPage.Size = new System.Drawing.Size(254, 351);
             this.CustomTabPage.TabIndex = 3;
-            this.CustomTabPage.Text = "Настраиваемый";
+            this.CustomTabPage.Text = "Кастом";
             this.CustomTabPage.UseVisualStyleBackColor = true;
             this.CustomTabPage.Enter += new System.EventHandler(this.CustomTabPage_Enter);
             // 
@@ -595,30 +788,6 @@ namespace ImpulseMaker
             this.CustomPeriodValueLabel.Size = new System.Drawing.Size(72, 13);
             this.CustomPeriodValueLabel.TabIndex = 21;
             this.CustomPeriodValueLabel.Text = "Период, сек:";
-            // 
-            // CustomPeriodValue
-            // 
-            this.CustomPeriodValue.DecimalPlaces = 3;
-            this.CustomPeriodValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.CustomPeriodValue.Location = new System.Drawing.Point(9, 256);
-            this.CustomPeriodValue.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.CustomPeriodValue.Name = "CustomPeriodValue";
-            this.CustomPeriodValue.Size = new System.Drawing.Size(120, 20);
-            this.CustomPeriodValue.TabIndex = 20;
-            this.CustomPeriodValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            131072});
-            this.CustomPeriodValue.ValueChanged += new System.EventHandler(this.CustomPeriodValue_ValueChanged);
             // 
             // ZeroEndingCustomCheckBox
             // 
@@ -656,9 +825,9 @@ namespace ImpulseMaker
             this.SaveCustomChannelLabel.AutoSize = true;
             this.SaveCustomChannelLabel.Location = new System.Drawing.Point(6, 301);
             this.SaveCustomChannelLabel.Name = "SaveCustomChannelLabel";
-            this.SaveCustomChannelLabel.Size = new System.Drawing.Size(164, 13);
+            this.SaveCustomChannelLabel.Size = new System.Drawing.Size(99, 13);
             this.SaveCustomChannelLabel.TabIndex = 15;
-            this.SaveCustomChannelLabel.Text = "Сохранить канал с названием:";
+            this.SaveCustomChannelLabel.Text = "Название канала:";
             // 
             // SaveCustomChannelButton
             // 
@@ -672,17 +841,42 @@ namespace ImpulseMaker
             this.SaveCustomChannelButton.UseVisualStyleBackColor = true;
             this.SaveCustomChannelButton.Click += new System.EventHandler(this.SaveCustomChannelButton_Click);
             // 
+            // CustomPeriodValue
+            // 
+            this.CustomPeriodValue.DecimalPlaces = 3;
+            this.CustomPeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.CustomPeriodValue.Location = new System.Drawing.Point(9, 256);
+            this.CustomPeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.CustomPeriodValue.Name = "CustomPeriodValue";
+            this.CustomPeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.CustomPeriodValue.TabIndex = 20;
+            this.CustomPeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.CustomPeriodValue.ValueChanged += new System.EventHandler(this.CustomPeriodValue_ValueChanged);
+            // 
             // pointCoordinatesListBox
             // 
             this.pointCoordinatesListBox.Location = new System.Drawing.Point(3, 3);
             this.pointCoordinatesListBox.Name = "pointCoordinatesListBox";
+            this.pointCoordinatesListBox.point_value_X_margin = 0.1D;
             this.pointCoordinatesListBox.Size = new System.Drawing.Size(248, 233);
             this.pointCoordinatesListBox.TabIndex = 0;
             this.pointCoordinatesListBox.Text = "pointCoordinatesListBox";
-            this.pointCoordinatesListBox.X_margin_needed += new EventHandler(this.PointCoordinatesListBox_X_margin_needed);
-            this.pointCoordinatesListBox.PointChanged += new PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointChanged);
-            this.pointCoordinatesListBox.PointAdded += new PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointAdded);
-            this.pointCoordinatesListBox.PointDeleted += new PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointDeleted);
+            this.pointCoordinatesListBox.X_margin_needed += new System.EventHandler(this.PointCoordinatesListBox_X_margin_needed);
+            this.pointCoordinatesListBox.PointChanged += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointChanged);
+            this.pointCoordinatesListBox.PointAdded += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointAdded);
+            this.pointCoordinatesListBox.PointDeleted += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointDeleted);
             // 
             // SamplingRateLabel
             // 
@@ -704,26 +898,13 @@ namespace ImpulseMaker
             this.SignalDurationLabel.TabIndex = 9;
             this.SignalDurationLabel.Text = "Длительность сигнала, сек:";
             // 
-            // SaveAllChannelsButton
-            // 
-            this.SaveAllChannelsButton.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveAllChannelsButton.BackgroundImage = global::ImpulseMaker.Properties.Resources.diskette;
-            this.SaveAllChannelsButton.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Stretch;
-            this.SaveAllChannelsButton.Location = new System.Drawing.Point(643, 133);
-            this.SaveAllChannelsButton.Name = "SaveAllChannelsButton";
-            this.SaveAllChannelsButton.RightToLeft = System.Windows.Forms.RightToLeft.No;
-            this.SaveAllChannelsButton.Size = new System.Drawing.Size(25, 25);
-            this.SaveAllChannelsButton.TabIndex = 11;
-            this.SaveAllChannelsButton.UseVisualStyleBackColor = true;
-            this.SaveAllChannelsButton.Click += new System.EventHandler(this.SaveAllChannelsButton_Click);
-            // 
             // SaveAllChannelsProgress
             // 
             this.SaveAllChannelsProgress.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.SaveAllChannelsProgress.Location = new System.Drawing.Point(674, 153);
+            this.SaveAllChannelsProgress.Location = new System.Drawing.Point(643, 138);
             this.SaveAllChannelsProgress.MarqueeAnimationSpeed = 10;
             this.SaveAllChannelsProgress.Name = "SaveAllChannelsProgress";
-            this.SaveAllChannelsProgress.Size = new System.Drawing.Size(132, 4);
+            this.SaveAllChannelsProgress.Size = new System.Drawing.Size(163, 6);
             this.SaveAllChannelsProgress.Step = 1;
             this.SaveAllChannelsProgress.Style = System.Windows.Forms.ProgressBarStyle.Continuous;
             this.SaveAllChannelsProgress.TabIndex = 12;
@@ -732,11 +913,11 @@ namespace ImpulseMaker
             // 
             this.SaveAllChannelsLabel.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.SaveAllChannelsLabel.AutoSize = true;
-            this.SaveAllChannelsLabel.Location = new System.Drawing.Point(671, 135);
+            this.SaveAllChannelsLabel.Location = new System.Drawing.Point(640, 122);
             this.SaveAllChannelsLabel.Name = "SaveAllChannelsLabel";
-            this.SaveAllChannelsLabel.Size = new System.Drawing.Size(122, 13);
+            this.SaveAllChannelsLabel.Size = new System.Drawing.Size(67, 13);
             this.SaveAllChannelsLabel.TabIndex = 8;
-            this.SaveAllChannelsLabel.Text = "Сохранить все каналы";
+            this.SaveAllChannelsLabel.Text = "Сохранение";
             // 
             // menuStrip1
             // 
@@ -777,10 +958,10 @@ namespace ImpulseMaker
             // 
             this.ChannelsListBox.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
             this.ChannelsListBox.BackColor = System.Drawing.SystemColors.Control;
-            this.ChannelsListBox.Location = new System.Drawing.Point(642, 172);
+            this.ChannelsListBox.Location = new System.Drawing.Point(642, 151);
             this.ChannelsListBox.Name = "ChannelsListBox";
             this.ChannelsListBox.selected_item = -1;
-            this.ChannelsListBox.Size = new System.Drawing.Size(164, 238);
+            this.ChannelsListBox.Size = new System.Drawing.Size(164, 259);
             this.ChannelsListBox.TabIndex = 10;
             this.ChannelsListBox.MoveSelectedUp += new System.EventHandler(this.ChannelsListBox_MoveSelectedUp);
             this.ChannelsListBox.MoveSelectedDown += new System.EventHandler(this.ChannelsListBox_MoveSelectedDown);
@@ -807,12 +988,13 @@ namespace ImpulseMaker
             0,
             0,
             65536});
+            this.SignalDurationValue.ValueChangedBeforeLeave += new System.EventHandler(this.SaveAllChannels);
             this.SignalDurationValue.ValueChanged += new System.EventHandler(this.SignalDuration_ValueChanged);
-            this.SamplingRateValue.ValueChangedBeforeLeave += new EventHandler(this.SaveAllChannelsButton_Click);
             // 
             // SamplingRateValue
             // 
             this.SamplingRateValue.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.SamplingRateValue.ImeMode = System.Windows.Forms.ImeMode.NoControl;
             this.SamplingRateValue.Increment = new decimal(new int[] {
             5000,
             0,
@@ -820,8 +1002,8 @@ namespace ImpulseMaker
             0});
             this.SamplingRateValue.Location = new System.Drawing.Point(643, 97);
             this.SamplingRateValue.Maximum = new decimal(new int[] {
-            -727379969,
-            232,
+            10000000,
+            0,
             0,
             0});
             this.SamplingRateValue.Minimum = new decimal(new int[] {
@@ -837,7 +1019,7 @@ namespace ImpulseMaker
             0,
             0,
             0});
-            this.SamplingRateValue.ValueChangedBeforeLeave += new EventHandler(this.SaveAllChannelsButton_Click);
+            this.SamplingRateValue.ValueChangedBeforeLeave += new System.EventHandler(this.SaveAllChannels);
             // 
             // WholeSignalChart
             // 
@@ -861,13 +1043,14 @@ namespace ImpulseMaker
             this.WholeSignalChart.Location = new System.Drawing.Point(0, 413);
             this.WholeSignalChart.Name = "WholeSignalChart";
             this.WholeSignalChart.point_value_X_margin = 0.007D;
+            this.WholeSignalChart.point_value_Y_margin = 0.01D;
             series1.BorderWidth = 3;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
             series1.Legend = "Legend1";
             series1.Name = "Series1";
             this.WholeSignalChart.Series.Add(series1);
-            this.WholeSignalChart.Size = new System.Drawing.Size(1084, 298);
+            this.WholeSignalChart.Size = new System.Drawing.Size(1084, 280);
             this.WholeSignalChart.TabIndex = 0;
             this.WholeSignalChart.Text = "OneSegmentChart";
             this.WholeSignalChart.X_margin_needed += new System.EventHandler(this.MyChart_X_margin_needed);
@@ -892,6 +1075,7 @@ namespace ImpulseMaker
             this.OneSegmentChart.Location = new System.Drawing.Point(0, 34);
             this.OneSegmentChart.Name = "OneSegmentChart";
             this.OneSegmentChart.point_value_X_margin = 0.007D;
+            this.OneSegmentChart.point_value_Y_margin = 0.01D;
             series2.BorderWidth = 3;
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
@@ -903,18 +1087,17 @@ namespace ImpulseMaker
             this.OneSegmentChart.TabIndex = 0;
             this.OneSegmentChart.Text = "OneSegmentChart";
             this.OneSegmentChart.X_margin_needed += new System.EventHandler(this.MyChart_X_margin_needed);
+            this.OneSegmentChart.PointChanged += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointChanged);
+            this.OneSegmentChart.PointAdded += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointAdded);
+            this.OneSegmentChart.PointDeleted += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointDeleted);
             this.OneSegmentChart.FinishedDrawing += new System.EventHandler(this.MyChart_FinishedDrawing);
-            this.OneSegmentChart.PointChanged += new MyChart.PointEventHandler(this.OneSegmentChart_PointChanged);
-            this.OneSegmentChart.PointAdded += new MyChart.PointEventHandler(this.OneSegmentChart_PointAdded);
-            this.OneSegmentChart.PointDeleted += new MyChart.PointEventHandler(this.OneSegmentChart_PointDeleted);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1084, 711);
+            this.ClientSize = new System.Drawing.Size(1084, 690);
             this.Controls.Add(this.SaveAllChannelsProgress);
-            this.Controls.Add(this.SaveAllChannelsButton);
             this.Controls.Add(this.ChannelsListBox);
             this.Controls.Add(this.SaveAllChannelsLabel);
             this.Controls.Add(this.SamplingRateLabel);
@@ -927,7 +1110,7 @@ namespace ImpulseMaker
             this.Controls.Add(this.menuStrip1);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
             this.MainMenuStrip = this.menuStrip1;
-            this.MinimumSize = new System.Drawing.Size(700, 700);
+            this.MinimumSize = new System.Drawing.Size(698, 688);
             this.Name = "Form1";
             this.Text = "SignalMaker";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -944,8 +1127,11 @@ namespace ImpulseMaker
             ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).EndInit();
             this.SineTabPage.ResumeLayout(false);
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown3)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.numericUpDown1)).EndInit();
+            this.SineTabPage.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAngleTrackBar)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).EndInit();
             this.CustomTabPage.ResumeLayout(false);
             this.CustomTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).EndInit();
@@ -967,8 +1153,8 @@ namespace ImpulseMaker
         private System.Windows.Forms.TabPage SineTabPage;
         private System.Windows.Forms.TabPage RampTabPage;
         private System.Windows.Forms.TabPage ImpulseTabPage;
-        private ImpulseMaker.MyNumericUpDown numericUpDown1;
-        private ImpulseMaker.MyNumericUpDown numericUpDown3;
+        private ImpulseMaker.MyNumericUpDown SineLevelValue;
+        private ImpulseMaker.MyNumericUpDown SineAmplitudeValue;
         private ImpulseMaker.MyNumericUpDown RampPeakValue;
         private System.Windows.Forms.Label RampBeginLabel;
         private ImpulseMaker.MyNumericUpDown RampBeginValue;
@@ -1001,7 +1187,6 @@ namespace ImpulseMaker
         private System.Windows.Forms.CheckBox ZeroEndingImpulseCheckBox;
         private System.Windows.Forms.Button DeleteRampChannelButton;
         private System.Windows.Forms.Button DeleteImpulseChannelButton;
-        private System.Windows.Forms.Button SaveAllChannelsButton;
         private System.Windows.Forms.ProgressBar SaveAllChannelsProgress;
         private System.Windows.Forms.Label SaveAllChannelsLabel;
         private System.Windows.Forms.MenuStrip menuStrip1;
@@ -1020,6 +1205,18 @@ namespace ImpulseMaker
         private System.Windows.Forms.TextBox CustomChannelName;
         private System.Windows.Forms.Label SaveCustomChannelLabel;
         private System.Windows.Forms.Button SaveCustomChannelButton;
+        private MyNumericUpDown SinePeriodValue;
+        private System.Windows.Forms.Label SineAngleTrackerLabel;
+        private System.Windows.Forms.TrackBar SineAngleTrackBar;
+        private System.Windows.Forms.Label SineAngleTrackBarLabel;
+        private System.Windows.Forms.Button DeleteSineChannelButton;
+        private System.Windows.Forms.CheckBox ZeroEndingSineCheckBox;
+        private System.Windows.Forms.TextBox SineChannelName;
+        private System.Windows.Forms.Label SaveSineChannelLabel;
+        private System.Windows.Forms.Button SaveSineChannelButton;
+        private System.Windows.Forms.Label SinePeriodValueLabel;
+        private System.Windows.Forms.Label SineAmplitudeLabel;
+        private System.Windows.Forms.Label SineLevelLabel;
     }
 }
 

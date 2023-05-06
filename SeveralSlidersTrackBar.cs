@@ -48,6 +48,9 @@ namespace ImpulseMaker
     [Description("Very basic slider control with selection range.")]
     public partial class SeveralSlidersTrackBar : UserControl
     {
+        public event EventHandler margin_needed;
+        public decimal margin = 0.001m;
+
         /// <summary> 
         /// Required designer variable.
         /// </summary>
@@ -264,7 +267,7 @@ namespace ImpulseMaker
                 movingMode = pointedValue < selectedMax ? MovingMode.MovingMin : MovingMode.MovingMax;
 
             //call this to refreh the position of the selected thumb
-            SelectionRangeSlider_MouseMove(sender, e);
+            //SelectionRangeSlider_MouseMove(sender, e);
         }
 
         void SelectionRangeSlider_MouseMove(object sender, MouseEventArgs e)
@@ -293,15 +296,18 @@ namespace ImpulseMaker
             if (!(e.Y > sMax.rect.Height && e.Y < Height - sMin.rect.Height))
                 return;
 
+            if (margin_needed != null)
+                margin_needed(this, null); 
+
             decimal pointedValue = Min + e.X * (Max - Min) / Width;
 
             if (movingMode == MovingMode.MovingMin)
                 SelectedMin = 
-                    (decimal)Math.Round((decimal)(pointedValue < Min ? Min : pointedValue > selectedMax ? selectedMax : pointedValue),
+                    (decimal)Math.Round((decimal)(pointedValue < Min ? Min : pointedValue > selectedMax - margin ? selectedMax - margin : pointedValue),
                     MathDecimals.GetDecimalPlaces(Max / rezolution));
             else if (movingMode == MovingMode.MovingMax)
                 SelectedMax = 
-                    (decimal)Math.Round((decimal)(pointedValue > Max ? Max : pointedValue < selectedMin ? selectedMin : pointedValue),
+                    (decimal)Math.Round((decimal)(pointedValue > Max ? Max : pointedValue < selectedMin + margin ? selectedMin + margin : pointedValue),
                     MathDecimals.GetDecimalPlaces(Max / rezolution));
         }
 

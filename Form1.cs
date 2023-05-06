@@ -87,7 +87,7 @@ namespace ImpulseMaker
                 IniFile MyIni = new IniFile(ini_path); //если не нашли файла - создаем
             }
 
-            SaveAllChannelsButton_Click(sender, e);
+            SaveAllChannels(sender, e);
 
             ChannelsListBox_fill();
 
@@ -96,6 +96,7 @@ namespace ImpulseMaker
                 RampChannelName.Text = "NewChannel_0";
                 ImpulseChannelName.Text = "NewChannel_0";
                 CustomChannelName.Text = "NewChannel_0";
+                SineChannelName.Text = "NewChannel_0";
 
                 double[] data = new double[0];
                 save_csv_channel(RampChannelName.Text, ref data);
@@ -114,11 +115,18 @@ namespace ImpulseMaker
                 RampChannelName.Text = "NewChannel_" + Channels.Count.ToString();
                 ImpulseChannelName.Text = "NewChannel_" + Channels.Count.ToString();
                 CustomChannelName.Text = "NewChannel_" + Channels.Count.ToString();
+                SineChannelName.Text = "NewChannel_" + Channels.Count.ToString();
 
                 redraw_whole_chart();
 
                 ChannelsListBox.selected_item = 0;
                 read_ini_channel(ChannelsListBox.Items[0]);
+
+                if (SignalTypeTabControl.SelectedIndex == 2)
+                {
+                    OneSegmentChart.enable_add_point = false;
+                    CustomTabPage.Enabled = false;
+                }
             }
 
             RampPeakTrackerLabel.Text = ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value).ToString();
@@ -165,6 +173,7 @@ namespace ImpulseMaker
                     impulse_graph(sender, e);
                     break;
                 case 2:
+                    sine_graph(sender, e);
                     break;
                 case 3:
                     custom_graph(sender, e);
@@ -223,6 +232,15 @@ namespace ImpulseMaker
                         redraw_impulse_wholegraph(Channels[i].name);
                         break;
                     case 2:
+
+                        SineLevelValue.Value = Convert.ToDecimal(MyIni.Read("LevelValue", Channels[i].name));
+                        SineAmplitudeValue.Value = Convert.ToDecimal(MyIni.Read("AmplitudeValue", Channels[i].name));
+                        SinePeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", Channels[i].name));
+                        SineAngleTrackerLabel.Text = MyIni.Read("Angle", Channels[i].name);
+                        SineAngleTrackBar.Value = (int)(Convert.ToDecimal(SineAngleTrackerLabel.Text) / 360 * 72);
+                        ZeroEndingSineCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1;
+
+                        redraw_sine_wholegraph(Channels[i].name);
                         break;
                     case 3:
 
@@ -289,7 +307,19 @@ namespace ImpulseMaker
                         break;
                     }
                 case 2:
-                    break;
+                    {
+                        double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
+                                            Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
+                                            Convert.ToDouble(MyIni.Read("Period", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("LevelValue", ch_name_to_save)),
+                                            Convert.ToDouble(MyIni.Read("AmplitudeValue", ch_name_to_save)),
+                                            (int)(Convert.ToDecimal(MyIni.Read("Angle", ch_name_to_save)) / 360 * 72),
+                                            Convert.ToInt32(MyIni.Read("IsZeroEnding", ch_name_to_save)) == 1 ? 1 : 0};
+
+                        if (calculate_sine_channel(ref data, ref controls) == 0)
+                            save_csv_channel(ch_name_to_save, ref data);
+                        break;
+                    }
                 case 3:
                     {
                         double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
@@ -305,13 +335,18 @@ namespace ImpulseMaker
 
                         if (calculate_custom_channel(ref data, ref controls, ref dataset) == 0)
                             save_csv_channel(ch_name_to_save, ref data);
+                        break;
                     }
-                    break;
                 default:
                     return;
             }
 
             write_csv_file();
+        }
+
+        private void SeveralSlidersTrackBar_margin_needed(object sender, EventArgs e)
+        {
+            SeveralSlidersImpulseTrackBar.margin = 1 / SamplingRateValue.Value;
         }
 
         private void MyChart_X_margin_needed(object sender, EventArgs e)
@@ -495,6 +530,15 @@ namespace ImpulseMaker
 
                     break;
                 case 2:
+
+                    MyIni.Write("Index", ChannelsListBox.Items.IndexOf(name).ToString(), name);
+                    MyIni.Write("Type", SignalTypeTabControl.SelectedIndex.ToString(), name);
+                    MyIni.Write("LevelValue", SineLevelValue.Value.ToString(), name);
+                    MyIni.Write("AmplitudeValue", SineAmplitudeValue.Value.ToString(), name);
+                    MyIni.Write("Period", SinePeriodValue.Value.ToString(), name);
+                    MyIni.Write("Angle", SineAngleTrackerLabel.Text, name);
+                    MyIni.Write("IsZeroEnding", (ZeroEndingSineCheckBox.Checked) ? "1" : "0", name);
+
                     break;
                 case 3:
 
@@ -569,6 +613,21 @@ namespace ImpulseMaker
 
                     break;
                 case 2:
+
+                    SineLevelValue.Value = Convert.ToDecimal(MyIni.Read("LevelValue", name));
+                    SineAmplitudeValue.Value = Convert.ToDecimal(MyIni.Read("AmplitudeValue", name));
+                    SinePeriodValue.Value = Convert.ToDecimal(MyIni.Read("Period", name));
+                    SineAngleTrackerLabel.Text = MyIni.Read("Angle", name);
+                    SineAngleTrackBar.Value = (int)(Convert.ToDecimal(SineAngleTrackerLabel.Text) / 360 * 72);
+                    ZeroEndingSineCheckBox.Checked = Convert.ToInt32(MyIni.Read("IsZeroEnding", name)) == 1;
+
+                    TAB_PAGE_I_WANT = 2;
+                    SignalTypeTabControl.SelectedIndex = 2;
+                    TAB_PAGE_I_WANT = -1;
+
+                    redraw_sine();
+                    redraw_sine_wholegraph();
+
                     break;
                 case 3:
 
@@ -655,6 +714,11 @@ namespace ImpulseMaker
             if (TAB_PAGE_I_WANT > 0)
                 return;
 
+            if (!OneSegmentChart.enable_add_point)
+                OneSegmentChart.enable_add_point = true;
+            if (!CustomTabPage.Enabled)
+                CustomTabPage.Enabled = true;
+
             SignalDurationValue.Minimum = RampPeriodValue.Value;
 
             is_drawing_busy = false;
@@ -667,6 +731,11 @@ namespace ImpulseMaker
 
         private void ImpulseTabPage_Enter(object sender, EventArgs e)
         {
+            if (!OneSegmentChart.enable_add_point)
+                OneSegmentChart.enable_add_point = true;
+            if (!CustomTabPage.Enabled)
+                CustomTabPage.Enabled = true;
+
             SignalDurationValue.Minimum = ImpulsePeriodValue.Value;
 
             is_drawing_busy = false;
@@ -697,20 +766,29 @@ namespace ImpulseMaker
 
         private void SineTabPage_Enter(object sender, EventArgs e)
         {
-            OneSegmentChart.Series[0].Points.Clear();
-            OneSegmentChart.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+            if (TAB_PAGE_I_WANT < 0)
+            {
+                OneSegmentChart.enable_add_point = false;
+                CustomTabPage.Enabled = false;
+            }
 
-            double[] xarr = new double[100];
-            double[] yarr = new double[100];
-            int i = 1;
+            SignalDurationValue.Minimum = SinePeriodValue.Value;
 
-            for (xarr[0] = 0.0, yarr[0] = Math.Sin(xarr[0]); i < 100; yarr[i] = Math.Sin(xarr[i]), ++i)
-                xarr[i] = xarr[i - 1] + 0.01;
-            OneSegmentChart.Series[0].Points.DataBindXY(xarr, yarr);
+            is_drawing_busy = false;
+            sine_graph(sender, e);
+
+            OneSegmentChart.set_default_chart_coord(0, (double)SinePeriodValue.Value,
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum,
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum);
         }
 
         private void CustomTabPage_Enter(object sender, EventArgs e)
-        {
+        {   
+            if (!CustomTabPage.Enabled)
+                return;
+            if (!OneSegmentChart.enable_add_point)
+                OneSegmentChart.enable_add_point = true;
+
             SignalDurationValue.Minimum = CustomPeriodValue.Value;
 
             DataPoint[] dataset = new DataPoint[OneSegmentChart.Series[0].Points.Count];
@@ -765,18 +843,23 @@ namespace ImpulseMaker
             OneSegmentChart.Series[0].Points.Clear();
             OneSegmentChart.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
 
-            double[] xarr = { 0, (double)RampPeriodValue.Value * (double)RampPeakTrackBar.Value / 100, (double)RampPeriodValue.Value };
-            double[] yarr = { ((double)RampPeakTrackBar.Value / 100 <= 0) ? (double)RampPeakValue.Value : (double)RampBeginValue.Value,
-                            ((double)RampPeakTrackBar.Value / 100 >= 0) ? (double)RampPeakValue.Value : (double)RampBeginValue.Value,
-                            ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value >= (double)RampPeriodValue.Value) ?
-                            (double)RampPeakValue.Value : (double)RampBeginValue.Value };
+            double[] xarr, yarr;
 
-            for (int i = 0; i < xarr.Count(); ++i)
-                if (xarr[i] > (double)RampPeriodValue.Value)
-                {
-                    xarr[i] = (double)RampPeriodValue.Value;
-                    yarr[i] = yarr[i - 1];
-                }
+            if ((double)RampPeakTrackBar.Value <= (double)RampPeakTrackBar.Minimum || (double)RampPeakTrackBar.Value >= (double)RampPeakTrackBar.Maximum)
+            {
+                xarr = new double[] { 0, (double)RampPeriodValue.Value };
+                yarr = new double[] { ((double)RampPeakTrackBar.Value / 100 <= 0) ? (double)RampPeakValue.Value : (double)RampBeginValue.Value,
+                                ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value >= (double)RampPeriodValue.Value) ?
+                                (double)RampPeakValue.Value : (double)RampBeginValue.Value };
+            }
+            else
+            {
+                xarr = new double[] { 0, (double)RampPeriodValue.Value * (double)RampPeakTrackBar.Value / 100, (double)RampPeriodValue.Value };
+                yarr = new double[] { ((double)RampPeakTrackBar.Value / 100 <= 0) ? (double)RampPeakValue.Value : (double)RampBeginValue.Value,
+                                ((double)RampPeakTrackBar.Value / 100 >= 0) ? (double)RampPeakValue.Value : (double)RampBeginValue.Value,
+                                ((double)RampPeakTrackBar.Value / 100 * (double)RampPeriodValue.Value >= (double)RampPeriodValue.Value) ?
+                                (double)RampPeakValue.Value : (double)RampBeginValue.Value };
+            }
 
             OneSegmentChart.Series[0].Points.DataBindXY(xarr, yarr);
 
@@ -784,6 +867,10 @@ namespace ImpulseMaker
             OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+
+            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
@@ -910,8 +997,7 @@ namespace ImpulseMaker
         {
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
-            BackgroundWorker bgw = new BackgroundWorker();
-            bgw.WorkerSupportsCancellation = true;  
+            BackgroundWorker bgw = new BackgroundWorker();  
             bgw.DoWork += new DoWorkEventHandler(bgw_SaveOneChannel);
             bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
 
@@ -976,27 +1062,63 @@ namespace ImpulseMaker
             OneSegmentChart.Series[0].Points.Clear();
             OneSegmentChart.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.FastLine;
 
-            double[] xarr = { 0,
-                (double)SeveralSlidersImpulseTrackBar.SelectedMin,
-                (double)SeveralSlidersImpulseTrackBar.SelectedMin + 1 / (double)SamplingRateValue.Value,
-                (double)SeveralSlidersImpulseTrackBar.SelectedMax,
-                (double)SeveralSlidersImpulseTrackBar.SelectedMax + 1 / (double)SamplingRateValue.Value,
-                (double)ImpulsePeriodValue.Value };
-            double[] yarr = { ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
-                            ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
-                            (double)ImpulseLevelValue.Value,
-                            (double)ImpulseLevelValue.Value,
-                            ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
-                            (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
-                            ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
-                            (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value };
+            double[] xarr, yarr;
 
-            for (int i = 0; i < xarr.Count(); ++i)
-                if (xarr[i] > (double)ImpulsePeriodValue.Value)
+            if ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= (double)SeveralSlidersImpulseTrackBar.Min ||
+                (double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max)
+            {
+                if ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= (double)SeveralSlidersImpulseTrackBar.Min &&
+                    (double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max)
                 {
-                    xarr[i] = (double)ImpulsePeriodValue.Value;
-                    yarr[i] = yarr[i - 1];
+                    xarr = new double[] { 0, (double)ImpulsePeriodValue.Value };
+                    yarr = new double[] { ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                        ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                        (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value };
                 }
+                else if ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= (double)SeveralSlidersImpulseTrackBar.Min &&
+                    (double)SeveralSlidersImpulseTrackBar.SelectedMax < (double)SeveralSlidersImpulseTrackBar.Max)
+                {
+                    xarr = new double[] { 0,
+                                        (double)SeveralSlidersImpulseTrackBar.SelectedMax,
+                                        (double)SeveralSlidersImpulseTrackBar.SelectedMax + 1 / (double)SamplingRateValue.Value,
+                                        (double)ImpulsePeriodValue.Value };
+                    yarr = new double[] { ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                        (double)ImpulseLevelValue.Value,
+                                        ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                        (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                        ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                        (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value };
+                }
+                else
+                {
+                    xarr = new double[] { 0,
+                                        (double)SeveralSlidersImpulseTrackBar.SelectedMin,
+                                        (double)SeveralSlidersImpulseTrackBar.SelectedMin + 1 / (double)SamplingRateValue.Value,
+                                        (double)ImpulsePeriodValue.Value };
+                    yarr = new double[] { ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                        ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                        (double)ImpulseLevelValue.Value,
+                                        ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                        (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value };
+                }
+            }
+            else
+            {
+                xarr = new double[] { 0,
+                                (double)SeveralSlidersImpulseTrackBar.SelectedMin,
+                                (double)SeveralSlidersImpulseTrackBar.SelectedMin + 1 / (double)SamplingRateValue.Value,
+                                (double)SeveralSlidersImpulseTrackBar.SelectedMax,
+                                (double)SeveralSlidersImpulseTrackBar.SelectedMax + 1 / (double)SamplingRateValue.Value,
+                                (double)ImpulsePeriodValue.Value };
+                yarr = new double[] { ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                ((double)SeveralSlidersImpulseTrackBar.SelectedMin <= 0) ? (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                (double)ImpulseLevelValue.Value,
+                                (double)ImpulseLevelValue.Value,
+                                ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value,
+                                ((double)SeveralSlidersImpulseTrackBar.SelectedMax >= (double)SeveralSlidersImpulseTrackBar.Max) ?
+                                (double)ImpulseLevelValue.Value : (double)ImpulseBaseValue.Value };
+            }
 
             OneSegmentChart.Series[0].Points.DataBindXY(xarr, yarr);
 
@@ -1004,6 +1126,10 @@ namespace ImpulseMaker
             OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+
+            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
@@ -1143,6 +1269,7 @@ namespace ImpulseMaker
         private void ImpulsePeriodValue_ValueChanged(object sender, EventArgs e)
         {
             SeveralSlidersImpulseTrackBar.Max = ImpulsePeriodValue.Value;
+
             SignalDurationValue.Minimum = ImpulsePeriodValue.Value;
             ImpulsePeriodValue.Maximum = SignalDurationValue.Value;
 
@@ -1211,6 +1338,182 @@ namespace ImpulseMaker
 
         #endregion
 
+        #region SineTab
+
+        private void SineAngleTrackBar_ValueChanged(object sender, EventArgs e)
+        {
+            SineAngleTrackerLabel.Text = ((double)SineAngleTrackBar.Value / 72 * 360).ToString();
+            sine_graph(sender, e);
+        }
+
+        private void SinePeriodValue_ValueChanged(object sender, EventArgs e)
+        {
+            SignalDurationValue.Minimum = SinePeriodValue.Value;
+            SinePeriodValue.Maximum = SignalDurationValue.Value;
+            sine_graph(sender, e);
+        }
+
+        private void sine_graph(object sender, EventArgs e)
+        {
+            if (!is_drawing_busy)
+            {
+                is_drawing_busy = true;
+                redraw_sine();
+                redraw_sine_wholegraph();
+            }
+        }
+
+        private void redraw_sine()
+        {
+            OneSegmentChart.Series[0].Points.Clear();
+            OneSegmentChart.Series[0].ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+
+            int number_of_points = 20;
+
+            var fx = (double level, double amplitude, double angle) => { return level + amplitude * Math.Sin(angle); };
+
+            double[] xarr = new double[number_of_points], yarr = new double[number_of_points];
+
+            for (int i = 0; i < number_of_points; ++i)
+            {
+                xarr[i] = (double)SinePeriodValue.Value / (number_of_points - 1) * i;
+                yarr[i] = fx((double)SineLevelValue.Value,
+                            (double)SineAmplitudeValue.Value,
+                            2 * Math.PI * (double)SineAngleTrackBar.Value / 72 + 2 * Math.PI / (number_of_points - 1) * i);
+            }
+
+            OneSegmentChart.Series[0].Points.DataBindXY(xarr, yarr);
+
+            OneSegmentChart.ChartAreas[0].AxisX.Minimum = xarr.First();
+            OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
+
+            OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+
+            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+
+            //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
+        }
+
+        private void redraw_sine_wholegraph(string name = "")
+        {
+            double segments = (double)SignalDurationValue.Value / (double)SinePeriodValue.Value;
+            if (segments <= 0)
+                return;
+
+            int chart_points = 500 + 1, i;
+
+            Series series;
+            if (name == "")
+            {
+                if (ChannelsListBox.selected_item < 0 || ChannelsListBox.Items.Count <= 0)
+                    return;
+                try
+                {
+                    series = ChannelsListBox.selected_item > 0 ? WholeSignalChart.Series[ChannelsListBox.Items
+                        [ChannelsListBox.selected_item].ToString()] : WholeSignalChart.Series[0];
+                }
+                catch
+                {
+                    return;
+                }
+            }
+            else series = WholeSignalChart.Series.FindByName(name);
+            if (series == null)
+                return;
+
+            series.Points.Clear();
+            series.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
+
+            var fx = (double level, double amplitude, double angle) => { return level + amplitude * Math.Sin(angle); };
+
+            double[] xarr = new double[chart_points];
+            double[] yarr = new double[chart_points];
+
+            for (i = 0; i < chart_points - 1; ++i)
+            {
+                xarr[i] = (double)SignalDurationValue.Value / (chart_points - 2) * i;
+                yarr[i] = fx((double)SineLevelValue.Value,
+                            (double)SineAmplitudeValue.Value,
+                            2 * segments * Math.PI * (double)SineAngleTrackBar.Value / 72 + 2 * segments * Math.PI / (chart_points - 2) * i);
+            }
+
+            if (ZeroEndingSineCheckBox.Checked)
+            {
+                xarr[xarr.Length - 1] = (double)SignalDurationValue.Value;
+                yarr[yarr.Length - 1] = 0;
+            }
+
+            for (i = xarr.Length - 1; i > (chart_points - 1) / segments; --i)
+                if (xarr[i] == 0)
+                {
+                    xarr[i] = (double)SignalDurationValue.Value;
+                    yarr[i] = yarr[i - 1];
+                }
+
+            series.Points.DataBindXY(xarr, yarr);
+
+            WholeSignalChart.ChartAreas[0].AxisX.Minimum = 0;
+            WholeSignalChart.ChartAreas[0].AxisX.Maximum = (double)SignalDurationValue.Value;
+            WholeSignalChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+            WholeSignalChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+
+            WholeSignalChart.ChartAreas[0].AxisX.Interval = (double)SignalDurationValue.Value / 10;
+            //WholeSignalChart.ChartAreas[0].AxisY.Interval = 0.1;
+        }
+
+        private void SaveSineChannelButton_Click(object sender, EventArgs e)
+        {
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveOneChannel);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
+
+            ch_name_to_save = SineChannelName.Text;
+            write_ini_channel(SineChannelName.Text);
+            double[] r = new double[0];
+            save_csv_channel(SineChannelName.Text, ref r);
+            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(SineChannelName.Text).ToString(), SineChannelName.Text);
+
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.clear_selection();
+            ChannelsListBox.selected_item = ChannelsListBox.FindByName(SineChannelName.Text);
+        }
+
+        private void ZeroEndingSineCheckBox_CheckedChange(object sender, EventArgs e)
+        {
+            sine_graph(sender, e);
+        }
+
+        private void DeleteSineChannelButton_Click(object sender, EventArgs e)
+        {
+            SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
+
+            BackgroundWorker bgw = new BackgroundWorker();
+            bgw.DoWork += new DoWorkEventHandler(bgw_SaveAllChannels);
+            bgw.RunWorkerCompleted += new RunWorkerCompletedEventHandler(bgw_WorkComplete);
+
+            IniFile MyIni = new IniFile(ini_path);
+            MyIni.Write("SignalDuration", SignalDurationValue.Value.ToString(), "Main");
+            MyIni.Write("SamplingRate", SamplingRateValue.Value.ToString(), "Main");
+
+            MyIni.DeleteSection(SineChannelName.Text);
+            delete_csv_channel(SineChannelName.Text);
+
+            bgw.RunWorkerAsync();
+
+            ChannelsListBox.clear_selection();
+            ChannelsListBox.selected_item = 0;
+        }
+
+        #endregion
+
         #region CustomTab
 
         private void custom_graph(object sender, EventArgs e)
@@ -1254,6 +1557,10 @@ namespace ImpulseMaker
             OneSegmentChart.ChartAreas[0].AxisX.Maximum = xarr.Last();
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
+
+            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
 
@@ -1355,6 +1662,9 @@ namespace ImpulseMaker
 
         private void CustomPeriodValue_ValueChanged(object sender, EventArgs e)
         {
+            SignalDurationValue.Minimum = CustomPeriodValue.Value;
+            CustomPeriodValue.Maximum = SignalDurationValue.Value;
+
             DataPoint[] old_dataset = pointCoordinatesListBox.Get_DataSet(),
                 new_dataset = old_dataset;
 
@@ -1503,6 +1813,7 @@ namespace ImpulseMaker
                     DeleteImpulseChannelButton_Click(sender, e);
                     break;
                 case 2:
+                    DeleteSineChannelButton_Click(sender, e);
                     break;
                 case 3:
                     DeleteCustomChannelButton_Click(sender, e);
@@ -1558,6 +1869,7 @@ namespace ImpulseMaker
                 RampChannelName.Text = Channels[ChannelsListBox.selected_item].name;
                 ImpulseChannelName.Text = Channels[ChannelsListBox.selected_item].name;
                 CustomChannelName.Text = Channels[ChannelsListBox.selected_item].name;
+                SineChannelName.Text = Channels[ChannelsListBox.selected_item].name;
 
                 OneSegmentChart.Series[0].Name = Channels[ChannelsListBox.selected_item].name;
                 OneSegmentChart.Series[0].Color = Color.FromArgb(255, WholeSignalChart.Series[ChannelsListBox.Items
@@ -1738,6 +2050,28 @@ namespace ImpulseMaker
             return 0;
         }
 
+        private int calculate_sine_channel(ref double[] data, ref double[] controls)
+        {
+            data = new double[(int)(controls[0] * controls[1])];
+
+            double segments = controls[0] / controls[2];
+            int i;
+            if (data.Length <= 0)
+                return -1;
+
+            var fx = (double level, double amplitude, double angle) => { return level + amplitude * Math.Sin(angle); };
+
+            for (i = 0; i < data.Length - 1; ++i)
+                data[i] = fx(controls[3],
+                            controls[4],
+                            2 * segments * Math.PI * controls[5] / 72 + 2 * segments * Math.PI / (data.Length - 2) * i);
+
+            if (controls[6] == 1)
+                data[data.Length - 1] = 0;
+
+            return 0;
+        }
+
         private int calculate_custom_channel(ref double[] data, ref double[] controls, ref DataPoint[] points)
         {
             if (points == null)
@@ -1775,7 +2109,7 @@ namespace ImpulseMaker
 
         #region SaveAllChannels
 
-        private void SaveAllChannelsButton_Click(object sender, EventArgs e)
+        private void SaveAllChannels(object sender, EventArgs e)
         {
             SaveAllChannelsProgress.Style = ProgressBarStyle.Marquee;
 
@@ -1838,7 +2172,20 @@ namespace ImpulseMaker
                             break;
                         }
                     case 2:
-                        break;
+                        {
+                            MyIni.Write("Index", ChannelsListBox.Items.IndexOf(Channels[i].name).ToString(), Channels[i].name);
+                            double[] controls = {Convert.ToDouble(MyIni.Read("SignalDuration", "Main")),
+                                            Convert.ToDouble(MyIni.Read("SamplingRate", "Main")),
+                                            Convert.ToDouble(MyIni.Read("Period", Channels[i].name)),
+                                            Convert.ToDouble(MyIni.Read("LevelValue", Channels[i].name)),
+                                            Convert.ToDouble(MyIni.Read("AmplitudeValue", Channels[i].name)),
+                                            (int)(Convert.ToDecimal(MyIni.Read("Angle", Channels[i].name)) / 360 * 72),
+                                            Convert.ToInt32(MyIni.Read("IsZeroEnding", Channels[i].name)) == 1 ? 1 : 0};
+
+                            if (calculate_sine_channel(ref data, ref controls) == 0)
+                                save_csv_channel(Channels[i].name, ref data);
+                            break;
+                        }
                     case 3:
                         {
                             MyIni.Write("Index", ChannelsListBox.Items.IndexOf(Channels[i].name).ToString(), Channels[i].name);
@@ -1855,8 +2202,8 @@ namespace ImpulseMaker
 
                             if (calculate_custom_channel(ref data, ref controls, ref dataset) == 0)
                                 save_csv_channel(Channels[i].name, ref data);
+                            break;
                         }
-                        break;
                     default:
                         return;
                 }
@@ -1883,7 +2230,8 @@ namespace ImpulseMaker
                 Filter = "csv files (*.csv)|*.csv",
                 AddExtension = true,
                 Multiselect = false,
-                SupportMultiDottedExtensions = false
+                SupportMultiDottedExtensions = false,
+                CheckFileExists = false
             };
             if (ofd.ShowDialog() != DialogResult.OK ||
                 !ofd.SafeFileName.EndsWith(".csv"))

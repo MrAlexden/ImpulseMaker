@@ -51,18 +51,20 @@ namespace ImpulseMaker
 
         void Add_Controls(object sender, EventArgs e)
         {
-            container = new ChildContainer(new Rectangle(2, roundness, Width - 4, Height - roundness - 30));
+            container = new ChildContainer(new Rectangle(2, (int)(roundness * 1.75), Width - 4, Height - (int)(roundness * 4) - 5));
             add_point = new Button
             { 
-                Location = new Point((int)(20 + (this.Width - 40) * 0.25f - (this.Width - 40) / 6), this.Height - 25),
+                Location = new Point((int)(20 + (this.Width - 40) * 0.25f - (this.Width - 40) / 6), this.Height - (int)(roundness * 2) - 5),
                 Width = (this.Width - 40) / 3,
+                Height = (int)(roundness * 2),
                 BackColor = Color.LightGray,
                 Text = "Добавить"
             };
             delete_point = new Button
             {
-                Location = new Point((int)(20 + (this.Width - 40) * 0.75f - (this.Width - 40) / 6), this.Height - 25),
+                Location = new Point((int)(20 + (this.Width - 40) * 0.75f - (this.Width - 40) / 6), this.Height - (int)(roundness * 2) - 5),
                 Width = (this.Width - 40) / 3,
+                Height = (int)(roundness * 2),
                 BackColor = Color.LightGray,
                 Text = "Удалить"
             };
@@ -138,10 +140,10 @@ namespace ImpulseMaker
                     {
                         Location = new Point(20, i * 20),
                         Width = (this.Width - 40) / 2,
-                        Minimum = Math.Round(i == 0 ? 0 : (i == dataset.Count() - 1 ? (decimal)(dataset[i].XValue) :
-                            (decimal)(dataset[i - 1].XValue + point_value_X_margin)), MathDecimals.GetDecimalPlaces(point_value_X_margin)),
-                        Maximum = Math.Round(i == dataset.Count() - 1 ? (decimal)(dataset[dataset.Count() - 1].XValue) :
-                            (decimal)(dataset[i + 1].XValue - point_value_X_margin), MathDecimals.GetDecimalPlaces(point_value_X_margin)),
+                        Minimum = Math.Abs(Math.Round(i == 0 ? 0 : (i == dataset.Count() - 1 ? (decimal)(dataset[i].XValue) :
+                            (decimal)(dataset[i - 1].XValue + point_value_X_margin)), MathDecimals.GetDecimalPlaces(point_value_X_margin))),
+                        Maximum = Math.Abs(Math.Round(i == dataset.Count() - 1 ? (decimal)(dataset[dataset.Count() - 1].XValue) :
+                            (decimal)(dataset[i + 1].XValue - point_value_X_margin), MathDecimals.GetDecimalPlaces(point_value_X_margin))),
                         //Value = (decimal)dataset[i].XValue,
                         Increment = (decimal)point_value_X_margin,
                         DecimalPlaces = MathDecimals.GetDecimalPlaces(point_value_X_margin)
@@ -164,9 +166,9 @@ namespace ImpulseMaker
                         Text = (i + 1).ToString()
                     }
                 });
-                this.container.points_set[i].nud_X.Value = (decimal)dataset[i].XValue < this.container.points_set[i].nud_X.Minimum ?
+                this.container.points_set[i].nud_X.Value = Math.Abs((decimal)dataset[i].XValue < this.container.points_set[i].nud_X.Minimum ?
                             this.container.points_set[i].nud_X.Minimum : ((decimal)dataset[i].XValue > this.container.points_set[i].nud_X.Maximum ?
-                            this.container.points_set[i].nud_X.Maximum : (decimal)dataset[i].XValue);
+                            this.container.points_set[i].nud_X.Maximum : (decimal)dataset[i].XValue));
             }
 
             container.AddAllPointsControlsToThisControl();
@@ -180,7 +182,7 @@ namespace ImpulseMaker
             DataPoint[] dataset = new DataPoint[container.points_set.Count];
 
             for (int i = 0; i < dataset.Count(); ++i)
-                dataset[i] = new DataPoint((double)container.points_set[i].nud_X.Value, (double)container.points_set[i].nud_Y.Value);
+                dataset[i] = new DataPoint(Math.Abs((double)container.points_set[i].nud_X.Value), (double)container.points_set[i].nud_Y.Value);
 
             return dataset;
         }
@@ -194,15 +196,15 @@ namespace ImpulseMaker
                 X_margin_needed(this, null);
 
             if (index != 0)
-                this.container.points_set[index - 1].nud_X.Maximum = Math.Round((decimal)(point.XValue - point_value_X_margin),
-                    MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index - 1].nud_X.Maximum = Math.Abs(Math.Round((decimal)(point.XValue - point_value_X_margin),
+                    MathDecimals.GetDecimalPlaces(point_value_X_margin)));
             if (index != this.container.points_set.Count - 1)
-                this.container.points_set[index + 1].nud_X.Minimum = Math.Round((decimal)(point.XValue + point_value_X_margin),
-                    MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index + 1].nud_X.Minimum = Math.Abs(Math.Round((decimal)(point.XValue + point_value_X_margin),
+                    MathDecimals.GetDecimalPlaces(point_value_X_margin)));
 
-            this.container.points_set[index].nud_X.Value = (decimal)point.XValue < this.container.points_set[index].nud_X.Minimum ?
+            this.container.points_set[index].nud_X.Value = Math.Abs((decimal)point.XValue < this.container.points_set[index].nud_X.Minimum ?
                 this.container.points_set[index].nud_X.Minimum : ((decimal)point.XValue > this.container.points_set[index].nud_X.Maximum ?
-                this.container.points_set[index].nud_X.Maximum : (decimal)point.XValue);
+                this.container.points_set[index].nud_X.Maximum : (decimal)point.XValue));
             this.container.points_set[index].nud_Y.Value = (decimal)point.YValues[0];
         }
 
@@ -216,11 +218,11 @@ namespace ImpulseMaker
                 X_margin_needed(this, null);
 
             if (index != 0)
-                this.container.points_set[index - 1].nud_X.Maximum = Math.Round((decimal)(point.XValue - point_value_X_margin),
-                    MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index - 1].nud_X.Maximum = Math.Abs(Math.Round((decimal)(point.XValue - point_value_X_margin),
+                    MathDecimals.GetDecimalPlaces(point_value_X_margin)));
             if (index != this.container.points_set.Count)
-                this.container.points_set[index].nud_X.Minimum = Math.Round((decimal)(point.XValue + point_value_X_margin),
-                    MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index].nud_X.Minimum = Math.Abs(Math.Round((decimal)(point.XValue + point_value_X_margin),
+                    MathDecimals.GetDecimalPlaces(point_value_X_margin)));
 
             this.container.Add_Point_at(index, point);
         }
@@ -235,11 +237,11 @@ namespace ImpulseMaker
                 X_margin_needed(this, null);
 
             if (index != 0)
-                this.container.points_set[index - 1].nud_X.Maximum = Math.Round(this.container.points_set[index + 1].nud_X.Value -
-                    (decimal)point_value_X_margin, MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index - 1].nud_X.Maximum = Math.Abs(Math.Round(this.container.points_set[index + 1].nud_X.Value -
+                    (decimal)point_value_X_margin, MathDecimals.GetDecimalPlaces(point_value_X_margin)));
             if (index != this.container.points_set.Count - 1)
-                this.container.points_set[index + 1].nud_X.Minimum = Math.Round(this.container.points_set[index - 1].nud_X.Value +
-                    (decimal)point_value_X_margin, MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                this.container.points_set[index + 1].nud_X.Minimum = Math.Abs(Math.Round(this.container.points_set[index - 1].nud_X.Value +
+                    (decimal)point_value_X_margin, MathDecimals.GetDecimalPlaces(point_value_X_margin)));
 
             this.container.Del_Point_at(index);
         }
@@ -356,12 +358,28 @@ namespace ImpulseMaker
                     points_set[i].num.MouseWheel += new MouseEventHandler(this.OnMouseWheel);
 
                     points_set[i].nud_X.ValueChanged += new EventHandler(this.OnValueChanged);
+                    points_set[i].nud_X.ValueChangedBeforeLeave += new EventHandler(this.OnManuallyValueChange);
                     points_set[i].nud_Y.ValueChanged += new EventHandler(this.OnValueChanged);
                 }
 
                 this.Controls.AddRange(X);
                 this.Controls.AddRange(Y);
                 this.Controls.AddRange(N);
+            }
+
+            void OnManuallyValueChange(object sender, EventArgs e)
+            {
+                int index = FindPointControlIndex((MyNumericUpDown)sender);
+
+                if (index > 0 && index < points_set.Count() - 1)
+                {
+                    /* Запрашиваем извне шаг, с которым можно изменять значения по Х */
+                    if (((PointCoordinatesListBox)(this.Parent)).X_margin_needed != null)
+                        ((PointCoordinatesListBox)(this.Parent)).X_margin_needed(this.Parent, null);
+
+                    points_set[index - 1].nud_X.Maximum = points_set[index].nud_X.Value - (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin;
+                    points_set[index + 1].nud_X.Minimum = points_set[index].nud_X.Value + (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin;
+                }
             }
 
             void OnValueChanged(object sender, EventArgs e)
@@ -418,20 +436,20 @@ namespace ImpulseMaker
             {
                 /* Запрашиваем извне шаг, с которым можно изменять значения по Х */
                 if (((PointCoordinatesListBox)(this.Parent)).X_margin_needed != null)
-                    ((PointCoordinatesListBox)(this.Parent)).X_margin_needed(this, null);
+                    ((PointCoordinatesListBox)(this.Parent)).X_margin_needed(this.Parent, null);
 
                 points_set.Insert(index, new point_coordinates_nud
                 {
                     nud_X = new MyNumericUpDown
                     { 
                         Width = (this.Parent.Width - 40) / 2,
-                        Minimum = Math.Round(index == 0 ? 0 : points_set[index - 1].nud_X.Value + 
+                        Minimum = Math.Abs(Math.Round(index == 0 ? 0 : points_set[index - 1].nud_X.Value + 
                             (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                            MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)),
-                        Maximum = Math.Round(index == points_set.Count() ? points_set[points_set.Count - 1].nud_X.Value :
+                            MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin))),
+                        Maximum = Math.Abs(Math.Round(index == points_set.Count() ? points_set[points_set.Count - 1].nud_X.Value :
                             index == 0 ? 0 :
                             points_set[index].nud_X.Value - (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                            MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)),
+                            MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin))),
                         Increment = (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
                         DecimalPlaces = MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)
                     },
@@ -449,30 +467,30 @@ namespace ImpulseMaker
                     },
                     num = new System.Windows.Forms.Label { Width = 20, Height = 20 }
                 });
-                points_set[index].nud_X.Value = point != null ? ((decimal)point.XValue < points_set[index].nud_X.Minimum ?
+                points_set[index].nud_X.Value = Math.Abs(point != null ? ((decimal)point.XValue < points_set[index].nud_X.Minimum ?
                     points_set[index].nud_X.Minimum : ((decimal)point.XValue > points_set[index].nud_X.Maximum ?
                     points_set[index].nud_X.Maximum : (decimal)point.XValue)) : (index == 0 ? points_set[index].nud_X.Minimum : (index == points_set.Count - 1 ? points_set[index - 1].nud_X.Value :
                             (points_set[index].nud_X.Minimum + (points_set[index + 1].nud_X.Value - points_set[index - 1].nud_X.Value) / 2 < 
                             points_set[index].nud_X.Minimum ? points_set[index].nud_X.Minimum : (points_set[index].nud_X.Minimum + 
                             (points_set[index + 1].nud_X.Value - points_set[index - 1].nud_X.Value) / 2) > points_set[index].nud_X.Maximum ?
-                            points_set[index].nud_X.Maximum : points_set[index].nud_X.Minimum + (points_set[index + 1].nud_X.Value - points_set[index - 1].nud_X.Value) / 2)));
+                            points_set[index].nud_X.Maximum : points_set[index].nud_X.Minimum + (points_set[index + 1].nud_X.Value - points_set[index - 1].nud_X.Value) / 2))));
 
                 if (index != 0)
-                    this.points_set[index - 1].nud_X.Maximum = Math.Round(this.points_set[index].nud_X.Value -
+                    this.points_set[index - 1].nud_X.Maximum = Math.Abs(Math.Round(this.points_set[index].nud_X.Value -
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
                 if (index == 0)
-                    this.points_set[index + 1].nud_X.Maximum = Math.Round(this.points_set[index + 2].nud_X.Value -
+                    this.points_set[index + 1].nud_X.Maximum = Math.Abs(Math.Round(this.points_set[index + 2].nud_X.Value -
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
                 if (index != this.points_set.Count() - 1)
-                    this.points_set[index + 1].nud_X.Minimum = Math.Round(this.points_set[index].nud_X.Value +
+                    this.points_set[index + 1].nud_X.Minimum = Math.Abs(Math.Round(this.points_set[index].nud_X.Value +
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
                 if (index == this.points_set.Count() - 1)
-                    this.points_set[index - 1].nud_X.Minimum = Math.Round(this.points_set[index - 2].nud_X.Value +
+                    this.points_set[index - 1].nud_X.Minimum = Math.Abs(Math.Round(this.points_set[index - 2].nud_X.Value +
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
 
                 for (int i = 0; i < points_set.Count; ++i)
                 {
@@ -507,7 +525,7 @@ namespace ImpulseMaker
 
                 /* Запрашиваем извне шаг, с которым можно изменять значения по Х */
                 if (((PointCoordinatesListBox)(this.Parent)).X_margin_needed != null)
-                    ((PointCoordinatesListBox)(this.Parent)).X_margin_needed(this, null);
+                    ((PointCoordinatesListBox)(this.Parent)).X_margin_needed(this.Parent, null);
 
                 points_set.RemoveAt(index);
 
@@ -520,13 +538,13 @@ namespace ImpulseMaker
                 }
 
                 if (index != 0)
-                    this.points_set[index - 1].nud_X.Maximum = Math.Round(this.points_set[index].nud_X.Value -
+                    this.points_set[index - 1].nud_X.Maximum = Math.Abs(Math.Round(this.points_set[index].nud_X.Value -
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
                 if (index != this.points_set.Count - 1)
-                    this.points_set[index].nud_X.Minimum = Math.Round(this.points_set[index - 1].nud_X.Value +
+                    this.points_set[index].nud_X.Minimum = Math.Abs(Math.Round(this.points_set[index - 1].nud_X.Value +
                         (decimal)((PointCoordinatesListBox)(this.Parent)).point_value_X_margin,
-                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin));
+                        MathDecimals.GetDecimalPlaces(((PointCoordinatesListBox)(this.Parent)).point_value_X_margin)));
 
                 AddAllPointsControlsToThisControl();
 
