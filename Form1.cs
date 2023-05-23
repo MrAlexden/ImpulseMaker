@@ -868,8 +868,16 @@ namespace ImpulseMaker
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
 
-            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
-            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            if (yarr.Min() == yarr.Max())
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+            }
+            else
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            }
 
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
@@ -1127,8 +1135,16 @@ namespace ImpulseMaker
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
 
-            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
-            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            if (yarr.Min() == yarr.Max())
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+            }
+            else
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            }
 
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
@@ -1389,8 +1405,16 @@ namespace ImpulseMaker
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
 
-            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
-            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            if (yarr.Min() == yarr.Max())
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+            }
+            else
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            }
 
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }
@@ -1558,8 +1582,16 @@ namespace ImpulseMaker
 
             OneSegmentChart.ChartAreas[0].AxisX.Interval = (xarr.Last() - xarr.First()) / 10;
 
-            OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
-            OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            if (yarr.Min() == yarr.Max())
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+            }
+            else
+            {
+                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+            }
 
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;
         }

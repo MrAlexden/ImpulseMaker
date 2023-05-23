@@ -51,9 +51,6 @@ namespace ImpulseMaker
             this.RampPeakTrackBarLabel = new System.Windows.Forms.Label();
             this.RampPeakLabel = new System.Windows.Forms.Label();
             this.RampBeginLabel = new System.Windows.Forms.Label();
-            this.RampBeginValue = new ImpulseMaker.MyNumericUpDown();
-            this.RampPeriodValue = new ImpulseMaker.MyNumericUpDown();
-            this.RampPeakValue = new ImpulseMaker.MyNumericUpDown();
             this.ImpulseTabPage = new System.Windows.Forms.TabPage();
             this.DeleteImpulseChannelButton = new System.Windows.Forms.Button();
             this.ZeroEndingImpulseCheckBox = new System.Windows.Forms.CheckBox();
@@ -64,10 +61,6 @@ namespace ImpulseMaker
             this.ImpulseLevelLabel = new System.Windows.Forms.Label();
             this.ImpulseBaseLabel = new System.Windows.Forms.Label();
             this.SaveImpulseChannelButton = new System.Windows.Forms.Button();
-            this.ImpulsePeriodValue = new ImpulseMaker.MyNumericUpDown();
-            this.ImpulseBaseValue = new ImpulseMaker.MyNumericUpDown();
-            this.ImpulseLevelValue = new ImpulseMaker.MyNumericUpDown();
-            this.SeveralSlidersImpulseTrackBar = new ImpulseMaker.SeveralSlidersTrackBar();
             this.SineTabPage = new System.Windows.Forms.TabPage();
             this.SinePeriodValueLabel = new System.Windows.Forms.Label();
             this.SineAmplitudeLabel = new System.Windows.Forms.Label();
@@ -80,9 +73,6 @@ namespace ImpulseMaker
             this.SineAngleTrackerLabel = new System.Windows.Forms.Label();
             this.SineAngleTrackBar = new System.Windows.Forms.TrackBar();
             this.SineAngleTrackBarLabel = new System.Windows.Forms.Label();
-            this.SinePeriodValue = new ImpulseMaker.MyNumericUpDown();
-            this.SineAmplitudeValue = new ImpulseMaker.MyNumericUpDown();
-            this.SineLevelValue = new ImpulseMaker.MyNumericUpDown();
             this.CustomTabPage = new System.Windows.Forms.TabPage();
             this.CustomPeriodValueLabel = new System.Windows.Forms.Label();
             this.ZeroEndingCustomCheckBox = new System.Windows.Forms.CheckBox();
@@ -90,8 +80,6 @@ namespace ImpulseMaker
             this.CustomChannelName = new System.Windows.Forms.TextBox();
             this.SaveCustomChannelLabel = new System.Windows.Forms.Label();
             this.SaveCustomChannelButton = new System.Windows.Forms.Button();
-            this.CustomPeriodValue = new ImpulseMaker.MyNumericUpDown();
-            this.pointCoordinatesListBox = new ImpulseMaker.PointCoordinatesListBox();
             this.SamplingRateLabel = new System.Windows.Forms.Label();
             this.SignalDurationLabel = new System.Windows.Forms.Label();
             this.SaveAllChannelsProgress = new System.Windows.Forms.ProgressBar();
@@ -105,28 +93,40 @@ namespace ImpulseMaker
             this.ChannelsListBox = new ImpulseMaker.MyListBox();
             this.SignalDurationValue = new ImpulseMaker.MyNumericUpDown();
             this.SamplingRateValue = new ImpulseMaker.MyNumericUpDown();
+            this.RampBeginValue = new ImpulseMaker.MyNumericUpDown();
+            this.RampPeriodValue = new ImpulseMaker.MyNumericUpDown();
+            this.RampPeakValue = new ImpulseMaker.MyNumericUpDown();
+            this.ImpulsePeriodValue = new ImpulseMaker.MyNumericUpDown();
+            this.ImpulseBaseValue = new ImpulseMaker.MyNumericUpDown();
+            this.ImpulseLevelValue = new ImpulseMaker.MyNumericUpDown();
+            this.SeveralSlidersImpulseTrackBar = new ImpulseMaker.SeveralSlidersTrackBar();
+            this.SinePeriodValue = new ImpulseMaker.MyNumericUpDown();
+            this.SineAmplitudeValue = new ImpulseMaker.MyNumericUpDown();
+            this.SineLevelValue = new ImpulseMaker.MyNumericUpDown();
+            this.CustomPeriodValue = new ImpulseMaker.MyNumericUpDown();
+            this.pointCoordinatesListBox = new ImpulseMaker.PointCoordinatesListBox();
             this.WholeSignalChart = new ImpulseMaker.MyChart();
             this.OneSegmentChart = new ImpulseMaker.MyChart();
             this.SignalTypeTabControl.SuspendLayout();
             this.RampTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RampPeakTrackBar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampBeginValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampPeriodValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampPeakValue)).BeginInit();
             this.ImpulseTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulsePeriodValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).BeginInit();
             this.SineTabPage.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SineAngleTrackBar)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).BeginInit();
             this.CustomTabPage.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).BeginInit();
             this.menuStrip1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SignalDurationValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.SamplingRateValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampBeginValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampPeriodValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampPeakValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulsePeriodValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.WholeSignalChart)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.OneSegmentChart)).BeginInit();
             this.SuspendLayout();
@@ -281,79 +281,6 @@ namespace ImpulseMaker
             this.RampBeginLabel.TabIndex = 2;
             this.RampBeginLabel.Text = "Начальное значение, В:";
             // 
-            // RampBeginValue
-            // 
-            this.RampBeginValue.DecimalPlaces = 2;
-            this.RampBeginValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.RampBeginValue.Location = new System.Drawing.Point(9, 31);
-            this.RampBeginValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.RampBeginValue.Name = "RampBeginValue";
-            this.RampBeginValue.Size = new System.Drawing.Size(120, 20);
-            this.RampBeginValue.TabIndex = 1;
-            this.RampBeginValue.ThousandsSeparator = true;
-            this.RampBeginValue.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-            this.RampBeginValue.ValueChanged += new System.EventHandler(this.ramp_graph);
-            // 
-            // RampPeriodValue
-            // 
-            this.RampPeriodValue.DecimalPlaces = 3;
-            this.RampPeriodValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.RampPeriodValue.Location = new System.Drawing.Point(9, 113);
-            this.RampPeriodValue.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.RampPeriodValue.Name = "RampPeriodValue";
-            this.RampPeriodValue.Size = new System.Drawing.Size(120, 20);
-            this.RampPeriodValue.TabIndex = 1;
-            this.RampPeriodValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            131072});
-            this.RampPeriodValue.ValueChanged += new System.EventHandler(this.RampPeriodValue_ValueChanged);
-            // 
-            // RampPeakValue
-            // 
-            this.RampPeakValue.DecimalPlaces = 2;
-            this.RampPeakValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.RampPeakValue.Location = new System.Drawing.Point(9, 72);
-            this.RampPeakValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.RampPeakValue.Name = "RampPeakValue";
-            this.RampPeakValue.Size = new System.Drawing.Size(120, 20);
-            this.RampPeakValue.TabIndex = 1;
-            this.RampPeakValue.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.RampPeakValue.ValueChanged += new System.EventHandler(this.ramp_graph);
-            // 
             // ImpulseTabPage
             // 
             this.ImpulseTabPage.Controls.Add(this.DeleteImpulseChannelButton);
@@ -465,111 +392,6 @@ namespace ImpulseMaker
             this.SaveImpulseChannelButton.TabIndex = 11;
             this.SaveImpulseChannelButton.UseVisualStyleBackColor = true;
             this.SaveImpulseChannelButton.Click += new System.EventHandler(this.SaveImpulseChannelButton_Click);
-            // 
-            // ImpulsePeriodValue
-            // 
-            this.ImpulsePeriodValue.DecimalPlaces = 3;
-            this.ImpulsePeriodValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.ImpulsePeriodValue.Location = new System.Drawing.Point(9, 113);
-            this.ImpulsePeriodValue.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.ImpulsePeriodValue.Name = "ImpulsePeriodValue";
-            this.ImpulsePeriodValue.Size = new System.Drawing.Size(120, 20);
-            this.ImpulsePeriodValue.TabIndex = 8;
-            this.ImpulsePeriodValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            131072});
-            this.ImpulsePeriodValue.ValueChanged += new System.EventHandler(this.ImpulsePeriodValue_ValueChanged);
-            // 
-            // ImpulseBaseValue
-            // 
-            this.ImpulseBaseValue.DecimalPlaces = 2;
-            this.ImpulseBaseValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.ImpulseBaseValue.Location = new System.Drawing.Point(9, 31);
-            this.ImpulseBaseValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.ImpulseBaseValue.Name = "ImpulseBaseValue";
-            this.ImpulseBaseValue.Size = new System.Drawing.Size(120, 20);
-            this.ImpulseBaseValue.TabIndex = 3;
-            this.ImpulseBaseValue.ThousandsSeparator = true;
-            this.ImpulseBaseValue.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            -2147483648});
-            this.ImpulseBaseValue.ValueChanged += new System.EventHandler(this.impulse_graph);
-            // 
-            // ImpulseLevelValue
-            // 
-            this.ImpulseLevelValue.DecimalPlaces = 2;
-            this.ImpulseLevelValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.ImpulseLevelValue.Location = new System.Drawing.Point(9, 72);
-            this.ImpulseLevelValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.ImpulseLevelValue.Name = "ImpulseLevelValue";
-            this.ImpulseLevelValue.Size = new System.Drawing.Size(120, 20);
-            this.ImpulseLevelValue.TabIndex = 4;
-            this.ImpulseLevelValue.Value = new decimal(new int[] {
-            1,
-            0,
-            0,
-            0});
-            this.ImpulseLevelValue.ValueChanged += new System.EventHandler(this.impulse_graph);
-            // 
-            // SeveralSlidersImpulseTrackBar
-            // 
-            this.SeveralSlidersImpulseTrackBar.Location = new System.Drawing.Point(1, 185);
-            this.SeveralSlidersImpulseTrackBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
-            this.SeveralSlidersImpulseTrackBar.Max = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.SeveralSlidersImpulseTrackBar.Min = new decimal(new int[] {
-            0,
-            0,
-            0,
-            0});
-            this.SeveralSlidersImpulseTrackBar.Name = "SeveralSlidersImpulseTrackBar";
-            this.SeveralSlidersImpulseTrackBar.SelectedMax = new decimal(new int[] {
-            15,
-            0,
-            0,
-            196608});
-            this.SeveralSlidersImpulseTrackBar.SelectedMin = new decimal(new int[] {
-            8,
-            0,
-            0,
-            196608});
-            this.SeveralSlidersImpulseTrackBar.Size = new System.Drawing.Size(249, 58);
-            this.SeveralSlidersImpulseTrackBar.TabIndex = 1;
-            this.SeveralSlidersImpulseTrackBar.margin_needed += new System.EventHandler(this.SeveralSlidersTrackBar_margin_needed);
-            this.SeveralSlidersImpulseTrackBar.SelectionChanged += new System.EventHandler(this.impulse_graph);
-            this.SeveralSlidersImpulseTrackBar.MinClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMin);
-            this.SeveralSlidersImpulseTrackBar.MaxClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMax);
             // 
             // SineTabPage
             // 
@@ -704,63 +526,6 @@ namespace ImpulseMaker
             this.SineAngleTrackBarLabel.TabIndex = 5;
             this.SineAngleTrackBarLabel.Text = "Угол поворота:";
             // 
-            // SinePeriodValue
-            // 
-            this.SinePeriodValue.DecimalPlaces = 3;
-            this.SinePeriodValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.SinePeriodValue.Location = new System.Drawing.Point(9, 113);
-            this.SinePeriodValue.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.SinePeriodValue.Name = "SinePeriodValue";
-            this.SinePeriodValue.Size = new System.Drawing.Size(120, 20);
-            this.SinePeriodValue.TabIndex = 8;
-            this.SinePeriodValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            131072});
-            this.SinePeriodValue.ValueChanged += new System.EventHandler(this.SinePeriodValue_ValueChanged);
-            // 
-            // SineAmplitudeValue
-            // 
-            this.SineAmplitudeValue.DecimalPlaces = 2;
-            this.SineAmplitudeValue.Location = new System.Drawing.Point(9, 72);
-            this.SineAmplitudeValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.SineAmplitudeValue.Name = "SineAmplitudeValue";
-            this.SineAmplitudeValue.Size = new System.Drawing.Size(120, 20);
-            this.SineAmplitudeValue.TabIndex = 0;
-            this.SineAmplitudeValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            0});
-            this.SineAmplitudeValue.ValueChanged += new System.EventHandler(this.sine_graph);
-            // 
-            // SineLevelValue
-            // 
-            this.SineLevelValue.DecimalPlaces = 2;
-            this.SineLevelValue.Location = new System.Drawing.Point(9, 31);
-            this.SineLevelValue.Minimum = new decimal(new int[] {
-            100,
-            0,
-            0,
-            -2147483648});
-            this.SineLevelValue.Name = "SineLevelValue";
-            this.SineLevelValue.Size = new System.Drawing.Size(120, 20);
-            this.SineLevelValue.TabIndex = 0;
-            this.SineLevelValue.ValueChanged += new System.EventHandler(this.sine_graph);
-            // 
             // CustomTabPage
             // 
             this.CustomTabPage.Controls.Add(this.CustomPeriodValueLabel);
@@ -840,43 +605,6 @@ namespace ImpulseMaker
             this.SaveCustomChannelButton.TabIndex = 16;
             this.SaveCustomChannelButton.UseVisualStyleBackColor = true;
             this.SaveCustomChannelButton.Click += new System.EventHandler(this.SaveCustomChannelButton_Click);
-            // 
-            // CustomPeriodValue
-            // 
-            this.CustomPeriodValue.DecimalPlaces = 3;
-            this.CustomPeriodValue.Increment = new decimal(new int[] {
-            1,
-            0,
-            0,
-            65536});
-            this.CustomPeriodValue.Location = new System.Drawing.Point(9, 256);
-            this.CustomPeriodValue.Minimum = new decimal(new int[] {
-            1,
-            0,
-            0,
-            196608});
-            this.CustomPeriodValue.Name = "CustomPeriodValue";
-            this.CustomPeriodValue.Size = new System.Drawing.Size(120, 20);
-            this.CustomPeriodValue.TabIndex = 20;
-            this.CustomPeriodValue.Value = new decimal(new int[] {
-            2,
-            0,
-            0,
-            131072});
-            this.CustomPeriodValue.ValueChanged += new System.EventHandler(this.CustomPeriodValue_ValueChanged);
-            // 
-            // pointCoordinatesListBox
-            // 
-            this.pointCoordinatesListBox.Location = new System.Drawing.Point(3, 3);
-            this.pointCoordinatesListBox.Name = "pointCoordinatesListBox";
-            this.pointCoordinatesListBox.point_value_X_margin = 0.1D;
-            this.pointCoordinatesListBox.Size = new System.Drawing.Size(248, 233);
-            this.pointCoordinatesListBox.TabIndex = 0;
-            this.pointCoordinatesListBox.Text = "pointCoordinatesListBox";
-            this.pointCoordinatesListBox.X_margin_needed += new System.EventHandler(this.PointCoordinatesListBox_X_margin_needed);
-            this.pointCoordinatesListBox.PointChanged += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointChanged);
-            this.pointCoordinatesListBox.PointAdded += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointAdded);
-            this.pointCoordinatesListBox.PointDeleted += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointDeleted);
             // 
             // SamplingRateLabel
             // 
@@ -1021,6 +749,278 @@ namespace ImpulseMaker
             0});
             this.SamplingRateValue.ValueChangedBeforeLeave += new System.EventHandler(this.SaveAllChannels);
             // 
+            // RampBeginValue
+            // 
+            this.RampBeginValue.DecimalPlaces = 2;
+            this.RampBeginValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.RampBeginValue.Location = new System.Drawing.Point(9, 31);
+            this.RampBeginValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.RampBeginValue.Name = "RampBeginValue";
+            this.RampBeginValue.Size = new System.Drawing.Size(120, 20);
+            this.RampBeginValue.TabIndex = 1;
+            this.RampBeginValue.ThousandsSeparator = true;
+            this.RampBeginValue.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.RampBeginValue.ValueChanged += new System.EventHandler(this.ramp_graph);
+            // 
+            // RampPeriodValue
+            // 
+            this.RampPeriodValue.DecimalPlaces = 3;
+            this.RampPeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.RampPeriodValue.Location = new System.Drawing.Point(9, 113);
+            this.RampPeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.RampPeriodValue.Name = "RampPeriodValue";
+            this.RampPeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.RampPeriodValue.TabIndex = 1;
+            this.RampPeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.RampPeriodValue.ValueChanged += new System.EventHandler(this.RampPeriodValue_ValueChanged);
+            // 
+            // RampPeakValue
+            // 
+            this.RampPeakValue.DecimalPlaces = 2;
+            this.RampPeakValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.RampPeakValue.Location = new System.Drawing.Point(9, 72);
+            this.RampPeakValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.RampPeakValue.Name = "RampPeakValue";
+            this.RampPeakValue.Size = new System.Drawing.Size(120, 20);
+            this.RampPeakValue.TabIndex = 1;
+            this.RampPeakValue.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.RampPeakValue.ValueChanged += new System.EventHandler(this.ramp_graph);
+            // 
+            // ImpulsePeriodValue
+            // 
+            this.ImpulsePeriodValue.DecimalPlaces = 3;
+            this.ImpulsePeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.ImpulsePeriodValue.Location = new System.Drawing.Point(9, 113);
+            this.ImpulsePeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.ImpulsePeriodValue.Name = "ImpulsePeriodValue";
+            this.ImpulsePeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.ImpulsePeriodValue.TabIndex = 8;
+            this.ImpulsePeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.ImpulsePeriodValue.ValueChanged += new System.EventHandler(this.ImpulsePeriodValue_ValueChanged);
+            // 
+            // ImpulseBaseValue
+            // 
+            this.ImpulseBaseValue.DecimalPlaces = 2;
+            this.ImpulseBaseValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.ImpulseBaseValue.Location = new System.Drawing.Point(9, 31);
+            this.ImpulseBaseValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.ImpulseBaseValue.Name = "ImpulseBaseValue";
+            this.ImpulseBaseValue.Size = new System.Drawing.Size(120, 20);
+            this.ImpulseBaseValue.TabIndex = 3;
+            this.ImpulseBaseValue.ThousandsSeparator = true;
+            this.ImpulseBaseValue.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            -2147483648});
+            this.ImpulseBaseValue.ValueChanged += new System.EventHandler(this.impulse_graph);
+            // 
+            // ImpulseLevelValue
+            // 
+            this.ImpulseLevelValue.DecimalPlaces = 2;
+            this.ImpulseLevelValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.ImpulseLevelValue.Location = new System.Drawing.Point(9, 72);
+            this.ImpulseLevelValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.ImpulseLevelValue.Name = "ImpulseLevelValue";
+            this.ImpulseLevelValue.Size = new System.Drawing.Size(120, 20);
+            this.ImpulseLevelValue.TabIndex = 4;
+            this.ImpulseLevelValue.Value = new decimal(new int[] {
+            1,
+            0,
+            0,
+            0});
+            this.ImpulseLevelValue.ValueChanged += new System.EventHandler(this.impulse_graph);
+            // 
+            // SeveralSlidersImpulseTrackBar
+            // 
+            this.SeveralSlidersImpulseTrackBar.Location = new System.Drawing.Point(1, 185);
+            this.SeveralSlidersImpulseTrackBar.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
+            this.SeveralSlidersImpulseTrackBar.Max = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.SeveralSlidersImpulseTrackBar.Min = new decimal(new int[] {
+            0,
+            0,
+            0,
+            0});
+            this.SeveralSlidersImpulseTrackBar.Name = "SeveralSlidersImpulseTrackBar";
+            this.SeveralSlidersImpulseTrackBar.SelectedMax = new decimal(new int[] {
+            15,
+            0,
+            0,
+            196608});
+            this.SeveralSlidersImpulseTrackBar.SelectedMin = new decimal(new int[] {
+            8,
+            0,
+            0,
+            196608});
+            this.SeveralSlidersImpulseTrackBar.Size = new System.Drawing.Size(249, 58);
+            this.SeveralSlidersImpulseTrackBar.TabIndex = 1;
+            this.SeveralSlidersImpulseTrackBar.margin_needed += new System.EventHandler(this.SeveralSlidersTrackBar_margin_needed);
+            this.SeveralSlidersImpulseTrackBar.SelectionChanged += new System.EventHandler(this.impulse_graph);
+            this.SeveralSlidersImpulseTrackBar.MinClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMin);
+            this.SeveralSlidersImpulseTrackBar.MaxClicked += new System.EventHandler(this.SelectionRangeSlider_MouseClickMax);
+            // 
+            // SinePeriodValue
+            // 
+            this.SinePeriodValue.DecimalPlaces = 3;
+            this.SinePeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.SinePeriodValue.Location = new System.Drawing.Point(9, 113);
+            this.SinePeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.SinePeriodValue.Name = "SinePeriodValue";
+            this.SinePeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.SinePeriodValue.TabIndex = 8;
+            this.SinePeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.SinePeriodValue.ValueChanged += new System.EventHandler(this.SinePeriodValue_ValueChanged);
+            // 
+            // SineAmplitudeValue
+            // 
+            this.SineAmplitudeValue.DecimalPlaces = 2;
+            this.SineAmplitudeValue.Location = new System.Drawing.Point(9, 72);
+            this.SineAmplitudeValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.SineAmplitudeValue.Name = "SineAmplitudeValue";
+            this.SineAmplitudeValue.Size = new System.Drawing.Size(120, 20);
+            this.SineAmplitudeValue.TabIndex = 0;
+            this.SineAmplitudeValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            0});
+            this.SineAmplitudeValue.ValueChanged += new System.EventHandler(this.sine_graph);
+            // 
+            // SineLevelValue
+            // 
+            this.SineLevelValue.DecimalPlaces = 2;
+            this.SineLevelValue.Location = new System.Drawing.Point(9, 31);
+            this.SineLevelValue.Minimum = new decimal(new int[] {
+            100,
+            0,
+            0,
+            -2147483648});
+            this.SineLevelValue.Name = "SineLevelValue";
+            this.SineLevelValue.Size = new System.Drawing.Size(120, 20);
+            this.SineLevelValue.TabIndex = 0;
+            this.SineLevelValue.ValueChanged += new System.EventHandler(this.sine_graph);
+            // 
+            // CustomPeriodValue
+            // 
+            this.CustomPeriodValue.DecimalPlaces = 3;
+            this.CustomPeriodValue.Increment = new decimal(new int[] {
+            1,
+            0,
+            0,
+            65536});
+            this.CustomPeriodValue.Location = new System.Drawing.Point(9, 256);
+            this.CustomPeriodValue.Minimum = new decimal(new int[] {
+            1,
+            0,
+            0,
+            196608});
+            this.CustomPeriodValue.Name = "CustomPeriodValue";
+            this.CustomPeriodValue.Size = new System.Drawing.Size(120, 20);
+            this.CustomPeriodValue.TabIndex = 20;
+            this.CustomPeriodValue.Value = new decimal(new int[] {
+            2,
+            0,
+            0,
+            131072});
+            this.CustomPeriodValue.ValueChanged += new System.EventHandler(this.CustomPeriodValue_ValueChanged);
+            // 
+            // pointCoordinatesListBox
+            // 
+            this.pointCoordinatesListBox.Location = new System.Drawing.Point(3, 3);
+            this.pointCoordinatesListBox.Name = "pointCoordinatesListBox";
+            this.pointCoordinatesListBox.point_value_X_margin = 0.1D;
+            this.pointCoordinatesListBox.Size = new System.Drawing.Size(248, 233);
+            this.pointCoordinatesListBox.TabIndex = 0;
+            this.pointCoordinatesListBox.Text = "pointCoordinatesListBox";
+            this.pointCoordinatesListBox.X_margin_needed += new System.EventHandler(this.PointCoordinatesListBox_X_margin_needed);
+            this.pointCoordinatesListBox.PointChanged += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointChanged);
+            this.pointCoordinatesListBox.PointAdded += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointAdded);
+            this.pointCoordinatesListBox.PointDeleted += new ImpulseMaker.PointCoordinatesListBox.PointEventHandler(this.PointCoordinatesListBox_PointDeleted);
+            // 
             // WholeSignalChart
             // 
             this.WholeSignalChart.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
@@ -1109,6 +1109,7 @@ namespace ImpulseMaker
             this.Controls.Add(this.OneSegmentChart);
             this.Controls.Add(this.menuStrip1);
             this.ForeColor = System.Drawing.SystemColors.ControlText;
+            this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.MainMenuStrip = this.menuStrip1;
             this.MinimumSize = new System.Drawing.Size(698, 688);
             this.Name = "Form1";
@@ -1118,27 +1119,27 @@ namespace ImpulseMaker
             this.RampTabPage.ResumeLayout(false);
             this.RampTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.RampPeakTrackBar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampBeginValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampPeriodValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.RampPeakValue)).EndInit();
             this.ImpulseTabPage.ResumeLayout(false);
             this.ImpulseTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulsePeriodValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).EndInit();
             this.SineTabPage.ResumeLayout(false);
             this.SineTabPage.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SineAngleTrackBar)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).EndInit();
             this.CustomTabPage.ResumeLayout(false);
             this.CustomTabPage.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).EndInit();
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.SignalDurationValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.SamplingRateValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampBeginValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampPeriodValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.RampPeakValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulsePeriodValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulseBaseValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.ImpulseLevelValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SinePeriodValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineAmplitudeValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.SineLevelValue)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.CustomPeriodValue)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.WholeSignalChart)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.OneSegmentChart)).EndInit();
             this.ResumeLayout(false);
