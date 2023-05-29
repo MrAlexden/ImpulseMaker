@@ -1043,7 +1043,7 @@ namespace ImpulseMaker
             this.WholeSignalChart.Location = new System.Drawing.Point(0, 413);
             this.WholeSignalChart.Name = "WholeSignalChart";
             this.WholeSignalChart.point_value_X_margin = 0.007D;
-            this.WholeSignalChart.point_value_Y_margin = 0.01D;
+            this.WholeSignalChart.point_value_Y_margin = 0.1D;
             series1.BorderWidth = 3;
             series1.ChartArea = "ChartArea1";
             series1.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
@@ -1054,6 +1054,7 @@ namespace ImpulseMaker
             this.WholeSignalChart.TabIndex = 0;
             this.WholeSignalChart.Text = "OneSegmentChart";
             this.WholeSignalChart.X_margin_needed += new System.EventHandler(this.MyChart_X_margin_needed);
+            this.WholeSignalChart.Y_margin_needed += new System.EventHandler(this.MyChart_Y_margin_needed);
             // 
             // OneSegmentChart
             // 
@@ -1075,7 +1076,7 @@ namespace ImpulseMaker
             this.OneSegmentChart.Location = new System.Drawing.Point(0, 34);
             this.OneSegmentChart.Name = "OneSegmentChart";
             this.OneSegmentChart.point_value_X_margin = 0.007D;
-            this.OneSegmentChart.point_value_Y_margin = 0.01D;
+            this.OneSegmentChart.point_value_Y_margin = 0.1D;
             series2.BorderWidth = 3;
             series2.ChartArea = "ChartArea1";
             series2.ChartType = System.Windows.Forms.DataVisualization.Charting.SeriesChartType.Spline;
@@ -1087,6 +1088,7 @@ namespace ImpulseMaker
             this.OneSegmentChart.TabIndex = 0;
             this.OneSegmentChart.Text = "OneSegmentChart";
             this.OneSegmentChart.X_margin_needed += new System.EventHandler(this.MyChart_X_margin_needed);
+            this.OneSegmentChart.Y_margin_needed += new System.EventHandler(this.MyChart_Y_margin_needed);
             this.OneSegmentChart.PointChanged += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointChanged);
             this.OneSegmentChart.PointAdded += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointAdded);
             this.OneSegmentChart.PointDeleted += new ImpulseMaker.MyChart.PointEventHandler(this.OneSegmentChart_PointDeleted);

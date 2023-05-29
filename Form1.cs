@@ -354,6 +354,11 @@ namespace ImpulseMaker
             ((MyChart)sender).point_value_X_margin = 1 / (double)SamplingRateValue.Value;
         }
 
+        private void MyChart_Y_margin_needed(object sender, EventArgs e)
+        {
+            ((MyChart)sender).point_value_Y_margin = 0.01;
+        }
+
         private void MyChart_FinishedDrawing(object sender, EventArgs e)
         {
             is_drawing_busy = false;
@@ -724,7 +729,7 @@ namespace ImpulseMaker
             is_drawing_busy = false;
             ramp_graph(sender, e);
 
-            OneSegmentChart.set_default_chart_coord(0, (double)RampPeriodValue.Value,
+            OneSegmentChart.set_default_chart_scales(0, (double)RampPeriodValue.Value,
                 OneSegmentChart.ChartAreas[0].AxisY.Minimum,
                 OneSegmentChart.ChartAreas[0].AxisY.Maximum);
         }
@@ -759,7 +764,7 @@ namespace ImpulseMaker
             nud_Min.ValueChanged += new EventHandler(nud_Min_ValueChange);
             nud_Max.ValueChanged += new EventHandler(nud_Max_ValueChange);
 
-            OneSegmentChart.set_default_chart_coord(0, (double)ImpulsePeriodValue.Value,
+            OneSegmentChart.set_default_chart_scales(0, (double)ImpulsePeriodValue.Value,
                 OneSegmentChart.ChartAreas[0].AxisY.Minimum,
                 OneSegmentChart.ChartAreas[0].AxisY.Maximum);
         }
@@ -777,7 +782,7 @@ namespace ImpulseMaker
             is_drawing_busy = false;
             sine_graph(sender, e);
 
-            OneSegmentChart.set_default_chart_coord(0, (double)SinePeriodValue.Value,
+            OneSegmentChart.set_default_chart_scales(0, (double)SinePeriodValue.Value,
                 OneSegmentChart.ChartAreas[0].AxisY.Minimum,
                 OneSegmentChart.ChartAreas[0].AxisY.Maximum);
         }
@@ -805,7 +810,7 @@ namespace ImpulseMaker
             is_drawing_busy = false;
             custom_graph(sender, e);
 
-            OneSegmentChart.set_default_chart_coord(0, (double)CustomPeriodValue.Value,
+            OneSegmentChart.set_default_chart_scales(0, (double)CustomPeriodValue.Value,
                 OneSegmentChart.ChartAreas[0].AxisY.Minimum,
                 OneSegmentChart.ChartAreas[0].AxisY.Maximum);
         }
@@ -1584,13 +1589,13 @@ namespace ImpulseMaker
 
             if (yarr.Min() == yarr.Max())
             {
-                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
-                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
+                //OneSegmentChart.ChartAreas[0].AxisY.Minimum = Double.NaN;
+                //OneSegmentChart.ChartAreas[0].AxisY.Maximum = Double.NaN;
             }
             else
             {
-                OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
-                OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
+                //OneSegmentChart.ChartAreas[0].AxisY.Minimum = Math.Round(yarr.Min() - (yarr.Max() - yarr.Min()) * 0.1, 1);
+                //OneSegmentChart.ChartAreas[0].AxisY.Maximum = Math.Round(yarr.Max() + (yarr.Max() - yarr.Min()) * 0.1, 1);
             }
 
             //OneSegmentChart.ChartAreas[0].AxisY.Interval = 0.1;

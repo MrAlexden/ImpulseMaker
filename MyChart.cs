@@ -18,7 +18,7 @@ namespace ImpulseMaker
 {
     internal class MyChart : Chart
     {
-        public event EventHandler SelectedSeriesChanged, HighligtedPointChanged, X_margin_needed;
+        public event EventHandler SelectedSeriesChanged, HighligtedPointChanged, X_margin_needed, Y_margin_needed;
         public delegate void CustomEventHandler(object sender, CustomEventArgs eventArgs);
         public event CustomEventHandler ColorChanged;
         public delegate void PointEventHandler(DataPoint point, int index);
@@ -58,7 +58,7 @@ namespace ImpulseMaker
         List<chart_coord> zoom_history = new List<chart_coord>();
         public series_setting[] settings = new series_setting[0];
         public bool recalc_chart_area = false;
-        chart_coord default_chart_coord;
+        chart_coord default_chart_scales, toshift_chart_series;
         SizeF text_size = new SizeF();
         ContextMenuStrip ChartSeriesContextMenuStrip = new ContextMenuStrip(),
             PointPositionContextMenuStrip = new ContextMenuStrip();
@@ -234,12 +234,19 @@ namespace ImpulseMaker
                                                        text_size.Width + 45,
                                                        text_size.Height * this.Series.Count);
                 if (this.Cursor == Cursors.Default)
-                    default_chart_coord = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
+                    default_chart_scales = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
                                                     (double)this.ChartAreas[0].AxisX.Maximum,
                                                     (double)this.ChartAreas[0].AxisY.Minimum,
                                                     (double)this.ChartAreas[0].AxisY.Maximum);
 
-                point_value_X_margin = (default_chart_coord.x_max - default_chart_coord.x_min) / 1000;
+                point_value_X_margin = (default_chart_scales.x_max - default_chart_scales.x_min) / 1000;
+                point_value_Y_margin = (default_chart_scales.y_max - default_chart_scales.y_min) / 1000;
+
+                if (X_margin_needed != null)
+                    X_margin_needed(this, null);
+                if (Y_margin_needed != null)
+                    Y_margin_needed(this, null);
+
                 is_enter = false;
                 recalc_chart_area = false;
                 is_resized = false;
@@ -493,9 +500,11 @@ namespace ImpulseMaker
             {
                 if (!is_in_chart_area)
                 {
-                    /* Запрашиваем извне шаг, с которым можно изменять значения по Х */
+                    /* Запрашиваем извне шаг, с которым можно изменять значения по Х и Y */
                     if (X_margin_needed != null)
                         X_margin_needed(this, null);
+                    if (Y_margin_needed != null)
+                        Y_margin_needed(this, null);
                     is_in_chart_area = true;
                 }
                 highligt_x = e.X;
@@ -515,21 +524,27 @@ namespace ImpulseMaker
             /* Если пользуемся функцией передвигания графика, то пересчитаваем границы осей */
             if (is_in_chart_area && this.Cursor == Cursors.Hand)
             {
-                double v1 = Math.Round(Math.Abs(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) -
-                    this.ChartAreas[0].AxisX.PixelPositionToValue(toshift_x)),
-                    MathDecimals.GetDecimalPlaces(this.ChartAreas[0].AxisX.Maximum) + 2);
-                this.ChartAreas[0].AxisX.Minimum += toshift_x > e.X ? v1 : -v1;
-                this.ChartAreas[0].AxisX.Maximum += toshift_x > e.X ? v1 : -v1;
+                double v1 = Math.Abs(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) -
+                    this.ChartAreas[0].AxisX.PixelPositionToValue(toshift_x));
 
-                double v2 = Math.Round(Math.Abs(this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) -
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(toshift_y)),
-                    MathDecimals.GetDecimalPlaces(this.ChartAreas[0].AxisY.Maximum) + 2);
+                if (v1 > 0)
+                {
+                    this.ChartAreas[0].AxisX.Minimum = Math.Round(toshift_chart_series.x_min + (toshift_x > e.X ? v1 : -v1),
+                        MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                    this.ChartAreas[0].AxisX.Maximum = Math.Round(toshift_chart_series.x_max + (toshift_x > e.X ? v1 : -v1),
+                        MathDecimals.GetDecimalPlaces(point_value_X_margin));
+                }
 
-                this.ChartAreas[0].AxisY.Minimum += toshift_y > e.Y ? -v2 : v2;
-                this.ChartAreas[0].AxisY.Maximum += toshift_y > e.Y ? -v2 : v2;
+                double v2 = Math.Abs(this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) -
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(toshift_y));
 
-                toshift_x = e.X;
-                toshift_y = e.Y;
+                if (v2 > 0)
+                {
+                    this.ChartAreas[0].AxisY.Minimum = Math.Round(toshift_chart_series.y_min + (toshift_y > e.Y ? -v2 : v2),
+                        MathDecimals.GetDecimalPlaces(point_value_Y_margin));
+                    this.ChartAreas[0].AxisY.Maximum = Math.Round(toshift_chart_series.y_max + (toshift_y > e.Y ? -v2 : v2),
+                        MathDecimals.GetDecimalPlaces(point_value_Y_margin));
+                }
 
                 this.ChartAreas[0].AxisX.Interval = (this.ChartAreas[0].AxisX.Maximum - this.ChartAreas[0].AxisX.Minimum) / 10;
                 //this.ChartAreas[0].AxisY.Interval = 0.1;
@@ -542,8 +557,8 @@ namespace ImpulseMaker
             {
                 /* Если крайние левый или правый узлы (изменение Y) */
                 if ((point_to_highlight == 0 || point_to_highlight == Series[selected_series].Points.Count - 1) &&
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_coord.y_min &&
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_coord.y_max)
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_scales.y_min &&
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_scales.y_max)
                 {
                     Series[selected_series].Points[point_to_highlight] = new DataPoint(
                         Series[selected_series].Points[point_to_highlight].XValue,
@@ -554,8 +569,8 @@ namespace ImpulseMaker
                 if (point_to_highlight != 0 && point_to_highlight != Series[selected_series].Points.Count - 1 &&
                     this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) > Series[selected_series].Points[point_to_highlight - 1].XValue &&
                     this.ChartAreas[0].AxisX.PixelPositionToValue(e.X) < Series[selected_series].Points[point_to_highlight + 1].XValue &&
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_coord.y_min &&
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_coord.y_max)
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_scales.y_min &&
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_scales.y_max)
                 {
                     Series[selected_series].Points[point_to_highlight] = new DataPoint(
                         RoundWithXMargin(this.ChartAreas[0].AxisX.PixelPositionToValue(e.X)),
@@ -563,8 +578,8 @@ namespace ImpulseMaker
                 }
                 /* Если уперлись в крайние положения по X (изменение Y) */
                 else if (point_to_highlight != 0 && point_to_highlight != Series[selected_series].Points.Count - 1 && 
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_coord.y_min &&
-                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_coord.y_max)
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) > default_chart_scales.y_min &&
+                    this.ChartAreas[0].AxisY.PixelPositionToValue(e.Y) < default_chart_scales.y_max)
                 {
                     Series[selected_series].Points[point_to_highlight] = new DataPoint(
                         Series[selected_series].Points[point_to_highlight].XValue,
@@ -582,10 +597,10 @@ namespace ImpulseMaker
 
                 /* TODO: Рескейлинг оси Y при подходе к крайним занчениям */
                 //if (Series[selected_series].Points[point_to_highlight].YValues[0] >
-                //    default_chart_coord.y_min + (default_chart_coord.y_max - default_chart_coord.y_min) * 0.9)
+                //    default_chart_scales.y_min + (default_chart_scales.y_max - default_chart_scales.y_min) * 0.9)
                 //{
-                //    this.ChartAreas[0].AxisY.Maximum = default_chart_coord.y_min + (default_chart_coord.y_max - default_chart_coord.y_min) * 1.01;
-                //    default_chart_coord.y_max = default_chart_coord.y_min + (default_chart_coord.y_max - default_chart_coord.y_min) * 1.01;
+                //    this.ChartAreas[0].AxisY.Maximum = default_chart_scales.y_min + (default_chart_scales.y_max - default_chart_scales.y_min) * 1.01;
+                //    default_chart_scales.y_max = default_chart_scales.y_min + (default_chart_scales.y_max - default_chart_scales.y_min) * 1.01;
                 //}
 
                 if (PointChanged != null)
@@ -671,7 +686,7 @@ namespace ImpulseMaker
                     this.Cursor = Cursors.NoMove2D;
 
                     zoom_history.Clear();
-                    //default_chart_coord = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
+                    //default_chart_scales = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
                     //                            (double)this.ChartAreas[0].AxisX.Maximum,
                     //                            (double)this.ChartAreas[0].AxisY.Minimum,
                     //                            (double)this.ChartAreas[0].AxisY.Maximum);
@@ -712,8 +727,8 @@ namespace ImpulseMaker
             {
                 if (this.Cursor == Cursors.NoMove2D)
                 {
-                    this.ChartAreas[0].AxisX.Minimum = default_chart_coord.x_min;
-                    this.ChartAreas[0].AxisX.Maximum = default_chart_coord.x_max;
+                    this.ChartAreas[0].AxisX.Minimum = default_chart_scales.x_min;
+                    this.ChartAreas[0].AxisX.Maximum = default_chart_scales.x_max;
                     this.ChartAreas[0].AxisY.Minimum = Double.NaN;
                     this.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
@@ -780,8 +795,8 @@ namespace ImpulseMaker
             {
                 if (this.Cursor == Cursors.NoMove2D)
                 {
-                    this.ChartAreas[0].AxisX.Minimum = default_chart_coord.x_min;
-                    this.ChartAreas[0].AxisX.Maximum = default_chart_coord.x_max;
+                    this.ChartAreas[0].AxisX.Minimum = default_chart_scales.x_min;
+                    this.ChartAreas[0].AxisX.Maximum = default_chart_scales.x_max;
                     this.ChartAreas[0].AxisY.Minimum = Double.NaN;
                     this.ChartAreas[0].AxisY.Maximum = Double.NaN;
 
@@ -793,7 +808,8 @@ namespace ImpulseMaker
                     recalc_chart_area = true;
                 }
 
-                this.Cursor = Cursors.Default;
+                if (this.Cursor != Cursors.Hand)
+                    this.Cursor = Cursors.Default;
             } 
         }
 
@@ -811,8 +827,15 @@ namespace ImpulseMaker
             if (is_in_chart_area && this.Cursor == Cursors.NoMove2D && e.Button == MouseButtons.Right)
             {
                 this.Cursor = Cursors.Hand;
+
                 toshift_x = e.X;
                 toshift_y = e.Y;
+
+                toshift_chart_series = new chart_coord((double)this.ChartAreas[0].AxisX.Minimum,
+                                                    (double)this.ChartAreas[0].AxisX.Maximum,
+                                                    (double)this.ChartAreas[0].AxisY.Minimum,
+                                                    (double)this.ChartAreas[0].AxisY.Maximum);
+
                 is_R_mouse_down = true;
             }
 
@@ -902,9 +925,9 @@ namespace ImpulseMaker
             Invalidate();
         }
 
-        public void set_default_chart_coord(double x_min_in, double x_max_in, double y_min_in, double y_max_in)
+        public void set_default_chart_scales(double x_min_in, double x_max_in, double y_min_in, double y_max_in)
         {
-            default_chart_coord = new chart_coord(x_min_in, x_max_in, y_min_in, y_max_in);
+            default_chart_scales = new chart_coord(x_min_in, x_max_in, y_min_in, y_max_in);
         }
 
         string find_longest_name()
@@ -927,8 +950,8 @@ namespace ImpulseMaker
         {
             double res = point_value_X_margin * (int)Math.Round(value / point_value_X_margin,
                 MathDecimals.GetDecimalPlaces(point_value_X_margin));
-            return res <= default_chart_coord.x_min ? res + point_value_X_margin : 
-                (res >= default_chart_coord.x_max ? res - point_value_X_margin : res);
+            return res <= default_chart_scales.x_min ? res + point_value_X_margin : 
+                (res >= default_chart_scales.x_max ? res - point_value_X_margin : res);
         }
 
         double RoundWithYMargin(double value)
