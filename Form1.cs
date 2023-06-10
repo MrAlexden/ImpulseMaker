@@ -771,11 +771,11 @@ namespace ImpulseMaker
 
         private void SineTabPage_Enter(object sender, EventArgs e)
         {
-            if (TAB_PAGE_I_WANT < 0)
-            {
+            //if (TAB_PAGE_I_WANT < 0)
+            //{
                 OneSegmentChart.enable_add_point = false;
                 CustomTabPage.Enabled = false;
-            }
+            //}
 
             SignalDurationValue.Minimum = SinePeriodValue.Value;
 
@@ -2284,6 +2284,7 @@ namespace ImpulseMaker
 
             key.Close();
 
+            is_csv_empty_on_init = false;
             init_frame(sender, e);
 
             ChannelsListBox.Invalidate();
@@ -2322,6 +2323,7 @@ namespace ImpulseMaker
             }
             catch { }
 
+            is_csv_empty_on_init = false;
             init_frame(sender, e);
 
             ChannelsListBox.Invalidate();

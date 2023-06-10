@@ -217,6 +217,14 @@ namespace ImpulseMaker
                 float y_bottom = (float)e.ChartGraphics.GetPositionFromAxis(this.ChartAreas[0].Name,
                     System.Windows.Forms.DataVisualization.Charting.AxisName.Y, this.ChartAreas[0].AxisY.Minimum);
 
+                if (float.IsNaN(y_top) || float.IsNaN(y_bottom))
+                {
+                    y_top = (float)e.ChartGraphics.GetPositionFromAxis(this.ChartAreas[0].Name,
+                        System.Windows.Forms.DataVisualization.Charting.AxisName.Y2, this.ChartAreas[0].AxisY2.Maximum);
+                    y_bottom = (float)e.ChartGraphics.GetPositionFromAxis(this.ChartAreas[0].Name,
+                        System.Windows.Forms.DataVisualization.Charting.AxisName.Y2, this.ChartAreas[0].AxisY2.Minimum);
+                }
+
                 chart_area = e.ChartGraphics.GetAbsoluteRectangle(new RectangleF(new PointF(x_left, y_top),
                     new SizeF(x_right - x_left, y_bottom - y_top)));
                 text_size = TextRenderer.MeasureText(find_longest_name(), this.Legends[0].Font);
