@@ -80,6 +80,11 @@ namespace ImpulseMaker
 
         #region SuppFuncs
 
+        public void ShowForm()
+        {
+            if (!this.Visible) { this.Show(); }
+        }
+
         private void init_frame(object sender, EventArgs e)
         {
             if (read_ini_file() < 0)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.VisualBasic.ApplicationServices;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,7 +17,29 @@ namespace ImpulseMaker
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+            SingleInstanceController controller = new SingleInstanceController();
+            controller.Run(new string[0]);
+        }
+    }
+
+    public class SingleInstanceController : WindowsFormsApplicationBase
+    {
+        public SingleInstanceController()
+        {
+            IsSingleInstance = true;
+
+            StartupNextInstance += this_StartupNextInstance;
+        }
+
+        void this_StartupNextInstance(object sender, StartupNextInstanceEventArgs e)
+        {
+            Form1 form = MainForm as Form1; //My derived form type
+            form.ShowForm();
+        }
+
+        protected override void OnCreateMainForm()
+        {
+            MainForm = new Form1();
         }
     }
 }
